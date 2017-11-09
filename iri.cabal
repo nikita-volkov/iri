@@ -1,0 +1,65 @@
+name:
+  iri
+version:
+  0.1
+category:
+  Data, Network
+synopsis:
+  International Resource Identifier library
+description:
+  A data-type with space-efficient representation for both URI and IRI and
+  utilities for it.
+homepage:
+  https://github.com/nikita-volkov/iri 
+bug-reports:
+  https://github.com/nikita-volkov/iri/issues 
+author:
+  Nikita Volkov <nikita.y.volkov@mail.ru>
+maintainer:
+  Nikita Volkov <nikita.y.volkov@mail.ru>
+copyright:
+  (c) 2017, Nikita Volkov
+license:
+  MIT
+license-file:
+  LICENSE
+build-type:
+  Simple
+cabal-version:
+  >=1.10
+
+source-repository head
+  type:
+    git
+  location:
+    git://github.com/nikita-volkov/iri.git
+
+library
+  hs-source-dirs:
+    library
+  default-extensions:
+    Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, PatternSynonyms, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
+  default-language:
+    Haskell2010
+  exposed-modules:
+    Iri.Data
+    Iri.Rendering
+    Iri.Attoparsec.ByteString
+  other-modules:
+    Iri.Prelude
+    Iri.PredicateTables
+    Iri.CodePointPredicates
+    Iri.PercentEncoding
+  build-depends:
+    ptr >=0.16 && <0.17,
+    attoparsec >=0.13 && <0.14,
+    punycode >=2 && <3,
+    ip >=1.1 && <2,
+    text ==1.*,
+    bytestring >=0.10 && <0.11,
+    vector >=0.10 && <0.13,
+    vector-builder >=0.3.4 && <0.4,
+    semigroups >=0.18 && <0.20,
+    bug ==1.*,
+    base-prelude >=1 && <2,
+    base >=4.7 && <5
