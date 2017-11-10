@@ -24,6 +24,12 @@ prependIfNotNull prepended it =
     then mempty
     else prepended <> it
 
+appendIfNotNull :: Builder -> Builder -> Builder
+appendIfNotNull appended it =
+  if null it
+    then mempty
+    else it <> appended
+
 iri :: Iri -> Builder
 iri (Iri schemeValue authorityValue hostValue portValue pathValue queryValue fragmentValue) =
   scheme schemeValue <> 
@@ -86,8 +92,11 @@ pathSegment (PathSegment value) =
 
 query :: Query -> Builder
 query (Query map) =
-  mempty
+  F.intercalate
+    (\ (key, value) -> text key <> prependIfNotNull (char '=') (text value))
+    (char '&')
+    map
 
 fragment :: Fragment -> Builder
-fragment =
-  mempty
+fragment (Fragment value) =
+  text value

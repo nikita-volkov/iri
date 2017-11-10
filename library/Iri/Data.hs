@@ -61,7 +61,7 @@ newtype PathSegment =
   PathSegment Text
 
 newtype Query =
-  Query (HashMap Text (Vector Text))
+  Query (Vector (Text, Text))
 
 newtype Fragment =
   Fragment Text

@@ -229,17 +229,7 @@ The stuff after the question mark.
 {-# INLINABLE existingQuery #-}
 existingQuery :: Parser Query
 existingQuery =
-  mplus (scan mempty) (return (Query mempty))
-  where
-    scan map =
-      do
-        !updatedMap <- queryPair updateMap
-        mplus
-          (mplus ampersand semicolon >> scan updatedMap)
-          (return (Query (fmap Q.build updatedMap)))
-      where
-        updateMap key value =
-          O.insertWith (<>) key (P.singleton value) map
+  fmap Query (E.sepBy (queryPair (,)) ampersand)
 
 {-# INLINE queryPair #-}
 queryPair :: (Text -> Text -> a) -> Parser a
