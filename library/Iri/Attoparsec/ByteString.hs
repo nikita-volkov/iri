@@ -3,29 +3,20 @@ where
 
 import Iri.Prelude hiding (foldl)
 import Iri.Data
-import Data.Attoparsec.ByteString
+import Data.Attoparsec.ByteString hiding (try)
 import qualified Data.Attoparsec.ByteString.Char8 as F
 import qualified Data.Text.Punycode as A
 import qualified Data.Text.Encoding as B
-import qualified Iri.PredicateTables as C
+import qualified Data.Text.Encoding.Error as L
 import qualified Data.Vector as D
+import qualified Data.ByteString as K
+import qualified Iri.PercentEncoding as I
+import qualified Iri.PredicateTables as C
 import qualified VectorBuilder.MonadPlus as E
 import qualified Ptr.Poking as G
 import qualified Ptr.ByteString as H
-import qualified Iri.PercentEncoding as I
+import qualified Text.Builder as J
 
-
-{-# INLINE foldl #-}
-foldl :: (a -> b -> a) -> a -> Parser b -> Parser a
-foldl step start elementParser =
-  loop start
-  where
-    loop state =
-      mplus
-        (do
-          element <- elementParser
-          loop $! step state element)
-        (return state)
 
 {-# INLINE takeWhileSatisfiesTable1 #-}
 takeWhileSatisfiesTable1 :: Vector Bool -> Parser ByteString
@@ -56,12 +47,12 @@ url =
         parsedQuery <- $(todo "")
         parsedFragment <- $(todo "")
         return (Iri parsedScheme parsedAuthority parsedHost parsedPort parsedPath parsedQuery parsedFragment)
-      else return (Iri parsedScheme parsedAuthority parsedHost parsedPort (Path mempty) (Query mempty mempty) (Fragment (Utf8String mempty)))
+      else return (Iri parsedScheme parsedAuthority parsedHost parsedPort (Path mempty) (Query mempty mempty) (Fragment mempty))
 
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
 scheme =
-  fmap (Scheme . Utf8String) (takeWhileSatisfiesTable1 C.scheme)
+  fmap (Scheme) (takeWhileSatisfiesTable1 C.scheme)
 
 {-# INLINE host #-}
 host :: Parser Host
@@ -82,7 +73,7 @@ domainLabel =
   do
     punycode <- takeWhileSatisfiesTable1 C.domainLabel
     case A.decode punycode of
-      Right text -> return (DomainLabel (Utf8String (B.encodeUtf8 text)))
+      Right text -> return (DomainLabel text)
       Left exception -> fail (showString "Punycode decoding exception: " (show exception))
 
 {-# INLINE port #-}
@@ -98,18 +89,29 @@ path =
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
 pathSegment =
-  fmap (PathSegment . Utf8String . H.poking) partPokings
+  fmap PathSegment urlEncodedSegment
+
+urlEncodedSegment :: Parser Text
+urlEncodedSegment =
+  foldlMMonadPlus progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
   where
-    partPokings =
-      foldl mappend mempty partPoking
+    progress (!builder, _, decode) bytes =
+      case unsafeDupablePerformIO (try (evaluate (decode bytes))) of
+        Right (B.Some decodedChunk undecodedBytes newDecode) ->
+          return (builder <> J.text decodedChunk, undecodedBytes, newDecode)
+        Left (L.DecodeError error _) ->
+          fail (showString "UTF8 decoding: " error)
+    finish (builder, undecodedBytes, _) =
+      if K.null undecodedBytes
+        then return (J.run builder)
+        else fail (showString "UTF8 decoding: Bytes remaining: " (show undecodedBytes))
+    partPoking =
+      unencoded <|> encoded
       where
-        partPoking =
-          unencoded <|> encoded
-          where
-            unencoded =
-              G.bytes <$> takeWhileSatisfiesTable1 C.unencodedPathSegment
-            encoded =
-              G.word8 <$> percentEncodedByte
+        unencoded =
+          takeWhileSatisfiesTable1 C.unencodedPathSegment
+        encoded =
+          K.singleton <$> percentEncodedByte
 
 {-# INLINE percentEncodedByte #-}
 percentEncodedByte :: Parser Word8

@@ -6,7 +6,7 @@ import qualified Data.Vector.Unboxed as A
 
 
 {-|
-Space-efficient representation of IRI.
+Thorough structure of IRI.
 
 For reference, see <https://en.wikipedia.org/wiki/Internationalized_Resource_Identifier>.
 -}
@@ -21,17 +21,17 @@ data Iri =
     {-# UNPACK #-} !Fragment
 
 newtype Scheme =
-  Scheme Utf8String
+  Scheme ByteString
 
 data Authority =
   PresentAuthority {-# UNPACK #-} !User {-# UNPACK #-} !Password |
   MissingAuthority
 
 newtype User =
-  User Utf8String
+  User Text
 
 data Password =
-  PresentPassword {-# UNPACK #-} !Utf8String |
+  PresentPassword {-# UNPACK #-} !Text |
   MissingPassword
 
 data Host =
@@ -48,7 +48,7 @@ newtype Idn =
   Idn (Vector DomainLabel)
 
 newtype DomainLabel =
-  DomainLabel Utf8String
+  DomainLabel Text
 
 data Port =
   PresentPort {-# UNPACK #-} !Word16 |
@@ -58,18 +58,10 @@ newtype Path =
   Path (Vector PathSegment)
 
 newtype PathSegment =
-  PathSegment Utf8String
+  PathSegment Text
 
 data Query =
-  Query {-# UNPACK #-} !(Vector Utf8String) {-# UNPACK #-} !(Vector Utf8String)
+  Query {-# UNPACK #-} !(Vector Text) {-# UNPACK #-} !(Vector Text)
 
 newtype Fragment =
-  Fragment Utf8String
-
-{-|
-UTF8-encoded bytes.
-
-Representing ASCII data comes at no cost. URI is encoded in ASCII.
--}
-newtype Utf8String =
-  Utf8String ByteString
+  Fragment Text
