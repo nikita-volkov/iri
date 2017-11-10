@@ -1,21 +1,30 @@
 module Iri.Attoparsec.ByteString
+(
+  url,
+)
 where
 
-import Iri.Prelude hiding (foldl)
+import Iri.Prelude hiding (foldl, hash)
 import Iri.Data
 import Data.Attoparsec.ByteString hiding (try)
 import qualified Data.Attoparsec.ByteString.Char8 as F
+import qualified Data.ByteString as K
+import qualified Data.Text as R
 import qualified Data.Text.Punycode as A
 import qualified Data.Text.Encoding as B
 import qualified Data.Text.Encoding.Error as L
 import qualified Data.Vector as D
-import qualified Data.ByteString as K
+import qualified Data.HashMap.Strict as O
+import qualified VectorBuilder.Builder as P
+import qualified VectorBuilder.Vector as Q
 import qualified Iri.PercentEncoding as I
 import qualified Iri.PredicateTables as C
 import qualified VectorBuilder.MonadPlus as E
 import qualified Ptr.Poking as G
 import qualified Ptr.ByteString as H
 import qualified Text.Builder as J
+import qualified Net.IPv4 as M
+import qualified Net.IPv6 as N
 
 
 {-# INLINE takeWhileSatisfiesTable1 #-}
@@ -28,6 +37,46 @@ percent :: Parser Word8
 percent =
   word8 37
 
+{-# INLINE colon #-}
+colon :: Parser Word8
+colon =
+  word8 58
+
+{-# INLINE at #-}
+at :: Parser Word8
+at =
+  word8 64
+
+{-# INLINE forwardSlash #-}
+forwardSlash :: Parser Word8
+forwardSlash =
+  word8 47
+
+{-# INLINE question #-}
+question :: Parser Word8
+question =
+  word8 63
+
+{-# INLINE hash #-}
+hash :: Parser Word8
+hash =
+  word8 35
+
+{-# INLINE equality #-}
+equality :: Parser Word8
+equality =
+  word8 61
+
+{-# INLINE ampersand #-}
+ampersand :: Parser Word8
+ampersand =
+  word8 38
+
+{-# INLINE semicolon #-}
+semicolon :: Parser Word8
+semicolon =
+  word8 59
+
 {-|
 Parser of a well-formed URL conforming to the RFC1738 standard into IRI.
 -}
@@ -36,28 +85,67 @@ url =
   do
     parsedScheme <- scheme
     string "://"
-    parsedAuthority <- $(todo "")
+    parsedAuthority <- (presentAuthority PresentAuthority <* at) <|> pure MissingAuthority
     parsedHost <- host
-    parsedPort <- PresentPort <$> (word8 58 *> port) <|> pure MissingPort
-    pathFollows <- True <$ word8 47 <|> pure False
+    parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
+    pathFollows <- True <$ forwardSlash <|> pure False
     if pathFollows
       then do
         parsedPath <- path
-        $(todo "")
-        parsedQuery <- $(todo "")
-        parsedFragment <- $(todo "")
+        parsedQuery <- query
+        parsedFragment <- fragment
         return (Iri parsedScheme parsedAuthority parsedHost parsedPort parsedPath parsedQuery parsedFragment)
-      else return (Iri parsedScheme parsedAuthority parsedHost parsedPort (Path mempty) (Query mempty mempty) (Fragment mempty))
+      else return (Iri parsedScheme parsedAuthority parsedHost parsedPort (Path mempty) (Query mempty) (Fragment mempty))
 
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
 scheme =
   fmap (Scheme) (takeWhileSatisfiesTable1 C.scheme)
 
+{-# INLINABLE presentAuthority #-}
+presentAuthority :: (User -> Password -> a) -> Parser a
+presentAuthority result =
+  do
+    user <- User <$> urlEncodedSegment
+    passwordFollows <- True <$ colon <|> pure False
+    if passwordFollows
+      then do
+        password <- PresentPassword <$> urlEncodedSegment
+        return (result user password)
+      else return (result user MissingPassword)
+
 {-# INLINE host #-}
 host :: Parser Host
 host =
-  $(todo "")
+  IpV6Host <$> ipV6 <|>
+  IpV4Host <$> M.parserUtf8 <|>
+  NamedHost <$> domainName
+
+{-# INLINABLE ipV6 #-}
+ipV6 :: Parser IPv6
+ipV6 =
+  do
+    a <- F.hexadecimal
+    colon
+    b <- F.hexadecimal
+    colon
+    c <- F.hexadecimal
+    colon
+    d <- F.hexadecimal
+    colon
+    mplus
+      (do
+        e <- F.hexadecimal
+        colon
+        f <- F.hexadecimal
+        colon
+        g <- F.hexadecimal
+        colon
+        h <- F.hexadecimal
+        return (N.fromWord16s a b c d e f g h))
+      (do
+        colon
+        return (N.fromWord16s a b c d 0 0 0 0))
 
 {-# INLINE domainName #-}
 domainName :: Parser Idn
@@ -71,10 +159,13 @@ Domain label with Punycode decoding applied.
 domainLabel :: Parser DomainLabel
 domainLabel =
   do
-    punycode <- takeWhileSatisfiesTable1 C.domainLabel
-    case A.decode punycode of
-      Right text -> return (DomainLabel text)
-      Left exception -> fail (showString "Punycode decoding exception: " (show exception))
+    punycodeFollows <- True <$ string "xn--" <|> pure False
+    ascii <- takeWhileSatisfiesTable1 C.domainLabel
+    if punycodeFollows
+      then case A.decode ascii of
+        Right text -> return (DomainLabel text)
+        Left exception -> fail (showString "Punycode decoding exception: " (show exception))
+      else return (DomainLabel (B.decodeUtf8 ascii))
 
 {-# INLINE port #-}
 port :: Parser Word16
@@ -91,6 +182,7 @@ pathSegment :: Parser PathSegment
 pathSegment =
   fmap PathSegment urlEncodedSegment
 
+{-# INLINABLE urlEncodedSegment #-}
 urlEncodedSegment :: Parser Text
 urlEncodedSegment =
   foldlMMonadPlus progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
@@ -121,3 +213,49 @@ percentEncodedByte =
     byte1 <- anyWord8
     byte2 <- anyWord8
     I.matchPercentEncodedBytes (fail "Broken percent encoding") return byte1 byte2
+
+{-# INLINABLE query #-}
+query :: Parser Query
+query =
+  do
+    queryFollows <- True <$ question <|> pure False
+    if queryFollows
+      then existingQuery
+      else return (Query mempty)
+
+{-|
+The stuff after the question mark.
+-}
+{-# INLINABLE existingQuery #-}
+existingQuery :: Parser Query
+existingQuery =
+  mplus (scan mempty) (return (Query mempty))
+  where
+    scan map =
+      do
+        !updatedMap <- queryPair updateMap
+        mplus
+          (mplus ampersand semicolon >> scan updatedMap)
+          (return (Query (fmap Q.build updatedMap)))
+      where
+        updateMap key value =
+          O.insertWith (<>) key (P.singleton value) map
+
+{-# INLINE queryPair #-}
+queryPair :: (Text -> Text -> a) -> Parser a
+queryPair result =
+  do
+    !key <- urlEncodedSegment
+    when (R.null key) (fail "Key is empty")
+    optional (string "[]")
+    !value <- (equality *> urlEncodedSegment) <|> pure ""
+    return (result key value)
+
+{-# INLINABLE fragment #-}
+fragment :: Parser Fragment
+fragment =
+  do
+    fragmentFollows <- True <$ hash <|> pure False
+    if fragmentFollows
+      then Fragment <$> urlEncodedSegment
+      else return (Fragment mempty)

@@ -36,6 +36,10 @@ import Net.IPv6 as Exports (IPv6)
 -------------------------
 import Data.Vector as Exports (Vector)
 
+-- unordered-containers
+-------------------------
+import Data.HashMap.Strict as Exports (HashMap)
+
 -- bug
 -------------------------
 import Bug as Exports
