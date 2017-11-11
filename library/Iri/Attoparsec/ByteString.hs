@@ -19,6 +19,7 @@ import qualified VectorBuilder.Builder as P
 import qualified VectorBuilder.Vector as Q
 import qualified Iri.PercentEncoding as I
 import qualified Iri.PredicateTables as C
+import qualified Iri.MonadPlus as R
 import qualified VectorBuilder.MonadPlus as E
 import qualified Ptr.Poking as G
 import qualified Ptr.ByteString as H
@@ -185,7 +186,7 @@ pathSegment =
 {-# INLINABLE urlEncodedSegment #-}
 urlEncodedSegment :: Parser Text
 urlEncodedSegment =
-  foldlMMonadPlus progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
+  R.foldlM progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
   where
     progress (!builder, _, decode) bytes =
       case unsafeDupablePerformIO (try (evaluate (decode bytes))) of

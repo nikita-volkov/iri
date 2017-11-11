@@ -50,6 +50,7 @@ library
   other-modules:
     Iri.Prelude
     Iri.Vector
+    Iri.MonadPlus
     Iri.PredicateTables
     Iri.CodePointPredicates
     Iri.PercentEncoding

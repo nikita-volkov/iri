@@ -1,8 +1,6 @@
 module Iri.Prelude
 (
   module Exports,
-  foldlMonadPlus,
-  foldlMMonadPlus,
 )
 where
 
@@ -44,28 +42,3 @@ import Data.HashMap.Strict as Exports (HashMap)
 -------------------------
 import Bug as Exports
 
---------------------------------------------------------------------------------
-
-{-# INLINE foldlMonadPlus #-}
-foldlMonadPlus :: MonadPlus m => (a -> b -> a) -> a -> m b -> m a
-foldlMonadPlus step start elementParser =
-  loop start
-  where
-    loop state =
-      mplus
-        (do
-          element <- elementParser
-          loop $! step state element)
-        (return state)
-
-{-# INLINE foldlMMonadPlus #-}
-foldlMMonadPlus :: MonadPlus m => (a -> b -> m a) -> a -> m b -> m a
-foldlMMonadPlus step start elementParser =
-  loop start
-  where
-    loop state =
-      mplus
-        (do
-          element <- elementParser
-          loop =<< step state element)
-        (return state)
