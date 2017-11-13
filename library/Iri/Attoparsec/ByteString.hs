@@ -101,11 +101,11 @@ scheme =
 presentAuthority :: (User -> Password -> a) -> Parser a
 presentAuthority result =
   do
-    user <- User <$> urlEncodedComponent (takeWhile1 (C.unencodedPathSegment . fromIntegral))
+    user <- User <$> urlEncodedComponent (C.unencodedPathSegment . fromIntegral)
     passwordFollows <- True <$ colon <|> pure False
     if passwordFollows
       then do
-        password <- PresentPassword <$> urlEncodedComponent (takeWhile1 (C.unencodedPathSegment . fromIntegral))
+        password <- PresentPassword <$> urlEncodedComponent (C.unencodedPathSegment . fromIntegral)
         return (result user password)
       else return (result user MissingPassword)
 
@@ -175,11 +175,11 @@ path =
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
 pathSegment =
-  fmap PathSegment (urlEncodedComponent (takeWhile1 (C.unencodedPathSegment . fromIntegral)))
+  fmap PathSegment (urlEncodedComponent (C.unencodedPathSegment . fromIntegral))
 
 {-# INLINABLE urlEncodedComponent #-}
-urlEncodedComponent :: Parser ByteString -> Parser Text
-urlEncodedComponent unencodedBytes =
+urlEncodedComponent :: (Word8 -> Bool) -> Parser Text
+urlEncodedComponent unencodedBytesPredicate =
   R.foldlM progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
   where
     progress (!builder, _, decode) bytes =
@@ -193,7 +193,7 @@ urlEncodedComponent unencodedBytes =
         then return (J.run builder)
         else fail (showString "UTF8 decoding: Bytes remaining: " (show undecodedBytes))
     partPoking =
-      unencodedBytes <|> encoded
+      takeWhile1 unencodedBytesPredicate <|> encoded
       where
         encoded =
           K.singleton <$> percentEncodedByte
@@ -228,10 +228,10 @@ existingQuery =
 queryPair :: (Text -> Text -> a) -> Parser a
 queryPair result =
   do
-    !key <- urlEncodedComponent (takeWhile1 (C.unencodedQueryComponent . fromIntegral))
+    !key <- urlEncodedComponent (C.unencodedQueryComponent . fromIntegral)
     when (R.null key) (fail "Key is empty")
     optional (string "[]")
-    !value <- (equality *> urlEncodedComponent (takeWhile1 (C.unencodedQueryComponent . fromIntegral))) <|> pure ""
+    !value <- (equality *> urlEncodedComponent (C.unencodedQueryComponent . fromIntegral)) <|> pure ""
     return (result key value)
 
 {-# INLINABLE fragment #-}
@@ -240,5 +240,5 @@ fragment =
   do
     fragmentFollows <- True <$ hash <|> pure False
     if fragmentFollows
-      then Fragment <$> urlEncodedComponent (takeWhile1 (C.unencodedFragment . fromIntegral))
+      then Fragment <$> urlEncodedComponent (C.unencodedFragment . fromIntegral)
       else return (Fragment mempty)
