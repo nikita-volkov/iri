@@ -107,11 +107,11 @@ scheme =
 presentAuthority :: (User -> Password -> a) -> Parser a
 presentAuthority result =
   do
-    user <- User <$> urlEncodedSegment
+    user <- User <$> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedPathSegment)
     passwordFollows <- True <$ colon <|> pure False
     if passwordFollows
       then do
-        password <- PresentPassword <$> urlEncodedSegment
+        password <- PresentPassword <$> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedPathSegment)
         return (result user password)
       else return (result user MissingPassword)
 
@@ -181,11 +181,11 @@ path =
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
 pathSegment =
-  fmap PathSegment urlEncodedSegment
+  fmap PathSegment (urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedPathSegment))
 
-{-# INLINABLE urlEncodedSegment #-}
-urlEncodedSegment :: Parser Text
-urlEncodedSegment =
+{-# INLINABLE urlEncodedComponent #-}
+urlEncodedComponent :: Parser ByteString -> Parser Text
+urlEncodedComponent unencodedBytes =
   R.foldlM progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
   where
     progress (!builder, _, decode) bytes =
@@ -199,10 +199,8 @@ urlEncodedSegment =
         then return (J.run builder)
         else fail (showString "UTF8 decoding: Bytes remaining: " (show undecodedBytes))
     partPoking =
-      unencoded <|> encoded
+      unencodedBytes <|> encoded
       where
-        unencoded =
-          takeWhileSatisfiesTable1 C.unencodedPathSegment
         encoded =
           K.singleton <$> percentEncodedByte
 
@@ -236,10 +234,10 @@ existingQuery =
 queryPair :: (Text -> Text -> a) -> Parser a
 queryPair result =
   do
-    !key <- urlEncodedSegment
+    !key <- urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedQueryComponent)
     when (R.null key) (fail "Key is empty")
     optional (string "[]")
-    !value <- (equality *> urlEncodedSegment) <|> pure ""
+    !value <- (equality *> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedQueryComponent)) <|> pure ""
     return (result key value)
 
 {-# INLINABLE fragment #-}
@@ -248,5 +246,5 @@ fragment =
   do
     fragmentFollows <- True <$ hash <|> pure False
     if fragmentFollows
-      then Fragment <$> urlEncodedSegment
+      then Fragment <$> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedFragment)
       else return (Fragment mempty)

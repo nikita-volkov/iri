@@ -25,3 +25,13 @@ domainLabel =
 unencodedPathSegment :: Vector Bool
 unencodedPathSegment =
   A.generate 256 B.unencodedPathSegment
+
+{-# NOINLINE unencodedQueryComponent #-}
+unencodedQueryComponent :: Vector Bool
+unencodedQueryComponent =
+  A.generate 256 B.unencodedQueryComponent
+
+{-# INLINE unencodedFragment #-}
+unencodedFragment :: Vector Bool
+unencodedFragment =
+  unencodedQueryComponent
