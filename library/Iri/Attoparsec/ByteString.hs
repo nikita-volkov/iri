@@ -18,7 +18,7 @@ import qualified Data.HashMap.Strict as O
 import qualified VectorBuilder.Builder as P
 import qualified VectorBuilder.Vector as Q
 import qualified Iri.PercentEncoding as I
-import qualified Iri.PredicateTables as C
+import qualified Iri.Rfc3986.PredicateTables as C
 import qualified Iri.MonadPlus as R
 import qualified VectorBuilder.MonadPlus as E
 import qualified Ptr.Poking as G

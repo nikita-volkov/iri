@@ -3,12 +3,12 @@ Predicate tables for implementing performant predicates.
 
 Reference: <https://tools.ietf.org/html/rfc1738>.
 -}
-module Iri.PredicateTables
+module Iri.Rfc3986.PredicateTables
 where
 
 import Iri.Prelude
 import qualified Data.Vector as A
-import qualified Iri.CodePointPredicates as B
+import qualified Iri.Rfc3986.CodePointPredicates as B
 
 
 {-# NOINLINE scheme #-}

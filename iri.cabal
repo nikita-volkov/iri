@@ -51,8 +51,8 @@ library
     Iri.Prelude
     Iri.Vector
     Iri.MonadPlus
-    Iri.PredicateTables
-    Iri.CodePointPredicates
+    Iri.Rfc3986.PredicateTables
+    Iri.Rfc3986.CodePointPredicates
     Iri.PercentEncoding
   build-depends:
     unordered-containers >=0.2 && <0.3,

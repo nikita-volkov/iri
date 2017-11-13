@@ -1,12 +1,10 @@
 {-|
 Predicates.
 
-References:
-
-- <https://www.ietf.org/rfc/rfc3986 RFC3986: Uniform Resource Identifier (URI): Generic Syntax>
-- <https://www.ietf.org/rfc/rfc3987 RFC3987: Internationalized Resource Identifiers (IRIs)>
+Reference:
+<https://www.ietf.org/rfc/rfc3986 RFC3986: Uniform Resource Identifier (URI): Generic Syntax>
 -}
-module Iri.CodePointPredicates
+module Iri.Rfc3986.CodePointPredicates
 where
 
 import Iri.Prelude hiding ((|||), (&&&), inRange)
