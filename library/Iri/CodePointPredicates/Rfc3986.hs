@@ -1,67 +1,21 @@
 {-|
-Predicates.
-
-Reference:
-<https://www.ietf.org/rfc/rfc3986 RFC3986: Uniform Resource Identifier (URI): Generic Syntax>
+References:
+- <https://www.ietf.org/rfc/rfc1738 RFC1738: Uniform Resource Locators (URL)
+- <https://www.ietf.org/rfc/rfc3986 RFC3986: Uniform Resource Identifier (URI): Generic Syntax>
 -}
-module Iri.Rfc3986.CodePointPredicates
+module Iri.CodePointPredicates.Rfc3986
 where
 
 import Iri.Prelude hiding ((|||), (&&&), inRange)
+import Iri.CodePointPredicates.Core
 import qualified Data.Vector as A
 
-
-type Predicate =
-  Int -> Bool
-
--- * Helpers
--------------------------
-
-oneOfChars :: [Char] -> Predicate
-oneOfChars string i =
-  elem i (fmap ord string)
-
-(|||) :: Predicate -> Predicate -> Predicate
-(|||) left right i =
-  left i || right i
-
-(&&&) :: Predicate -> Predicate -> Predicate
-(&&&) left right i =
-  left i && right i
-
-inRange :: Int -> Int -> Predicate
-inRange min max i =
-  i >= min && i <= max
-
-inCharRange :: Char -> Char -> Predicate
-inCharRange min max =
-  inRange (ord min) (ord max)
-
--- * Specifics
--------------------------
 
 alphanumeric :: Predicate
 alphanumeric =
   inCharRange 'a' 'z' |||
   inCharRange 'A' 'Z' |||
   inCharRange '0' '9'
-
-scheme :: Predicate
-scheme i =
-  i >= ord 'a' && i <= ord 'z' ||
-  i >= ord 'A' && i <= ord 'Z' ||
-  i >= ord '0' && i <= ord '9' ||
-  i == ord '+' ||
-  i == ord '.' ||
-  i == ord '-'
-
-domainLabel :: Predicate
-domainLabel i =
-  i >= ord 'a' && i <= ord 'z' ||
-  i >= ord 'A' && i <= ord 'Z' ||
-  i >= ord '0' && i <= ord '9' ||
-  i == ord '-' ||
-  i == ord '_'
 
 encoded :: Predicate
 encoded =
@@ -123,6 +77,18 @@ reserved =
 special :: Predicate
 special =
   oneOfChars "$-_.+!*'(),"
+
+{-# NOINLINE scheme #-}
+scheme :: Predicate
+scheme =
+  cached 256 $
+  alphanumeric ||| oneOfChars "+.-"
+
+{-# NOINLINE domainLabel #-}
+domainLabel :: Predicate
+domainLabel =
+  cached 256 $
+  alphanumeric ||| oneOfChars "-_"
 
 {-|
 The path component contains data, usually organized in hierarchical
@@ -196,8 +162,10 @@ the implementation of the URI's dereferencing algorithm.
 
 <https://tools.ietf.org/html/rfc3986#section-3.3>
 -}
+{-# NOINLINE unencodedPathSegment #-}
 unencodedPathSegment :: Predicate
 unencodedPathSegment =
+  cached 256 $
   alphanumeric ||| special
 
 {-|
@@ -223,8 +191,10 @@ encoding those characters.
 
 <https://tools.ietf.org/html/rfc3986#section-3.4>
 -}
+{-# NOINLINE unencodedQueryComponent #-}
 unencodedQueryComponent :: Predicate
 unencodedQueryComponent =
+  cached 256 $
   alphanumeric ||| special ||| oneOfChars "/?"
 
 unencodedFragment :: Predicate

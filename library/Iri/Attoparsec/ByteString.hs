@@ -13,12 +13,11 @@ import qualified Data.Text as R
 import qualified Data.Text.Punycode as A
 import qualified Data.Text.Encoding as B
 import qualified Data.Text.Encoding.Error as L
-import qualified Data.Vector as D
 import qualified Data.HashMap.Strict as O
 import qualified VectorBuilder.Builder as P
 import qualified VectorBuilder.Vector as Q
 import qualified Iri.PercentEncoding as I
-import qualified Iri.Rfc3986.PredicateTables as C
+import qualified Iri.CodePointPredicates.Rfc3986 as C
 import qualified Iri.MonadPlus as R
 import qualified VectorBuilder.MonadPlus as E
 import qualified Ptr.Poking as G
@@ -27,11 +26,6 @@ import qualified Text.Builder as J
 import qualified Net.IPv4 as M
 import qualified Net.IPv6 as N
 
-
-{-# INLINE takeWhileSatisfiesTable1 #-}
-takeWhileSatisfiesTable1 :: Vector Bool -> Parser ByteString
-takeWhileSatisfiesTable1 table =
-  takeWhile1 (D.unsafeIndex table . fromIntegral)
 
 {-# INLINE percent #-}
 percent :: Parser Word8
@@ -101,17 +95,17 @@ url =
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
 scheme =
-  fmap (Scheme) (takeWhileSatisfiesTable1 C.scheme)
+  fmap Scheme (takeWhile1 (C.scheme . fromIntegral))
 
 {-# INLINABLE presentAuthority #-}
 presentAuthority :: (User -> Password -> a) -> Parser a
 presentAuthority result =
   do
-    user <- User <$> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedPathSegment)
+    user <- User <$> urlEncodedComponent (takeWhile1 (C.unencodedPathSegment . fromIntegral))
     passwordFollows <- True <$ colon <|> pure False
     if passwordFollows
       then do
-        password <- PresentPassword <$> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedPathSegment)
+        password <- PresentPassword <$> urlEncodedComponent (takeWhile1 (C.unencodedPathSegment . fromIntegral))
         return (result user password)
       else return (result user MissingPassword)
 
@@ -161,7 +155,7 @@ domainLabel :: Parser DomainLabel
 domainLabel =
   do
     punycodeFollows <- True <$ string "xn--" <|> pure False
-    ascii <- takeWhileSatisfiesTable1 C.domainLabel
+    ascii <- takeWhile1 (C.domainLabel . fromIntegral)
     if punycodeFollows
       then case A.decode ascii of
         Right text -> return (DomainLabel text)
@@ -181,7 +175,7 @@ path =
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
 pathSegment =
-  fmap PathSegment (urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedPathSegment))
+  fmap PathSegment (urlEncodedComponent (takeWhile1 (C.unencodedPathSegment . fromIntegral)))
 
 {-# INLINABLE urlEncodedComponent #-}
 urlEncodedComponent :: Parser ByteString -> Parser Text
@@ -234,10 +228,10 @@ existingQuery =
 queryPair :: (Text -> Text -> a) -> Parser a
 queryPair result =
   do
-    !key <- urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedQueryComponent)
+    !key <- urlEncodedComponent (takeWhile1 (C.unencodedQueryComponent . fromIntegral))
     when (R.null key) (fail "Key is empty")
     optional (string "[]")
-    !value <- (equality *> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedQueryComponent)) <|> pure ""
+    !value <- (equality *> urlEncodedComponent (takeWhile1 (C.unencodedQueryComponent . fromIntegral))) <|> pure ""
     return (result key value)
 
 {-# INLINABLE fragment #-}
@@ -246,5 +240,5 @@ fragment =
   do
     fragmentFollows <- True <$ hash <|> pure False
     if fragmentFollows
-      then Fragment <$> urlEncodedComponent (takeWhileSatisfiesTable1 C.unencodedFragment)
+      then Fragment <$> urlEncodedComponent (takeWhile1 (C.unencodedFragment . fromIntegral))
       else return (Fragment mempty)
