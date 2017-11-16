@@ -12,7 +12,10 @@ type Predicate =
 cached :: Int -> Predicate -> Predicate
 cached size predicate =
   case A.generate size predicate of
-    vector -> A.unsafeIndex vector
+    vector -> \ codePoint ->
+      if codePoint < size
+        then A.unsafeIndex vector codePoint
+        else False
 
 oneOfChars :: [Char] -> Predicate
 oneOfChars string i =
