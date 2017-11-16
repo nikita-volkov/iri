@@ -9,13 +9,10 @@ type Predicate =
   Int -> Bool
 
 {-# NOINLINE cached #-}
-cached :: Int -> Predicate -> Predicate
-cached size predicate =
-  case A.generate size predicate of
-    vector -> \ codePoint ->
-      if codePoint < size
-        then A.unsafeIndex vector codePoint
-        else False
+cached :: Predicate -> Predicate
+cached predicate =
+  case A.generate 256 predicate of
+    vector -> A.unsafeIndex vector
 
 oneOfChars :: [Char] -> Predicate
 oneOfChars string i =

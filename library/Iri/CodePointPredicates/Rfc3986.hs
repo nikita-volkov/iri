@@ -81,13 +81,13 @@ special =
 {-# NOINLINE scheme #-}
 scheme :: Predicate
 scheme =
-  cached 256 $
+  cached $
   alphanumeric ||| oneOfChars "+.-"
 
 {-# NOINLINE domainLabel #-}
 domainLabel :: Predicate
 domainLabel =
-  cached 256 $
+  cached $
   alphanumeric ||| oneOfChars "-_"
 
 {-|
@@ -165,7 +165,7 @@ the implementation of the URI's dereferencing algorithm.
 {-# NOINLINE unencodedPathSegment #-}
 unencodedPathSegment :: Predicate
 unencodedPathSegment =
-  cached 256 $
+  cached $
   alphanumeric ||| special
 
 {-|
@@ -194,7 +194,7 @@ encoding those characters.
 {-# NOINLINE unencodedQueryComponent #-}
 unencodedQueryComponent :: Predicate
 unencodedQueryComponent =
-  cached 256 $
+  cached $
   alphanumeric ||| special ||| oneOfChars "/?"
 
 unencodedFragment :: Predicate
