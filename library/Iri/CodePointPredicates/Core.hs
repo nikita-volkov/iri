@@ -11,7 +11,7 @@ type Predicate =
 {-# NOINLINE cached #-}
 cached :: Int -> Predicate -> Predicate
 cached size predicate =
-  case A.generate 256 predicate of
+  case A.generate size predicate of
     vector -> A.unsafeIndex vector
 
 oneOfChars :: [Char] -> Predicate
