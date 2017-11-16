@@ -13,6 +13,11 @@ import BasePrelude as Exports hiding (assert, left, right, isLeft, isRight, (<>)
 -------------------------
 import Foreign as Exports hiding (void)
 
+-- contravariant
+-------------------------
+import Data.Functor.Contravariant as Exports
+import Data.Functor.Contravariant.Divisible as Exports
+
 -- semigroups
 -------------------------
 import Data.Semigroup as Exports

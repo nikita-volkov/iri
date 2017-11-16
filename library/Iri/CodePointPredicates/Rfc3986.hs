@@ -6,7 +6,7 @@ References:
 module Iri.CodePointPredicates.Rfc3986
 where
 
-import Iri.Prelude hiding ((|||), (&&&), inRange)
+import Iri.Prelude hiding ((|||), (&&&), inRange, Predicate)
 import Iri.CodePointPredicates.Core
 import qualified Data.Vector as A
 
@@ -200,3 +200,17 @@ unencodedQueryComponent =
 unencodedFragment :: Predicate
 unencodedFragment =
   unencodedQueryComponent
+
+{-# NOINLINE unencodedUserInfoComponent #-}
+unencodedUserInfoComponent :: Predicate
+unencodedUserInfoComponent =
+  cached $
+  unreserved ||| subDelims
+
+unreserved :: Predicate
+unreserved =
+  alphanumeric ||| oneOfChars "-._~"
+
+subDelims :: Predicate
+subDelims =
+  oneOfChars "!$&'()*+,;="
