@@ -3,11 +3,11 @@ name:
 version:
   0.1
 category:
-  Data, Network
+  IRI, URI, URL, Data, Network
 synopsis:
   International Resource Identifier library
 description:
-  A data-type with space-efficient representation for both URI and IRI and
+  A data-type with space-efficient representation for both URI (URL) and IRI and
   utilities for it.
 homepage:
   https://github.com/nikita-volkov/iri 
