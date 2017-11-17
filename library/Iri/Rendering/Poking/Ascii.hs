@@ -72,17 +72,15 @@ uri (Iri schemeValue authorityValue hostValue portValue pathValue queryValue fra
       asciiChar '@'
     MissingAuthority -> mempty) <>
   host hostValue <>
-  prependIfNotNull
+  (prependIfNotNull
     (asciiChar '/')
-    (mappend
-      (mappend
-        (path pathValue)
-        (prependIfNotNull
-          (asciiChar '?')
-          (query queryValue)))
-      (prependIfNotNull
-        (asciiChar '#')
-        (fragment fragmentValue)))
+    (path pathValue)) <>
+  (prependIfNotNull
+    (asciiChar '?')
+    (query queryValue)) <>
+  (prependIfNotNull
+    (asciiChar '#')
+    (fragment fragmentValue))
 
 scheme :: Scheme -> Poking
 scheme (Scheme value) =

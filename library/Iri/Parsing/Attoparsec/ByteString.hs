@@ -83,14 +83,10 @@ url =
     parsedAuthority <- (presentAuthority PresentAuthority <* at) <|> pure MissingAuthority
     parsedHost <- host
     parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
-    pathFollows <- True <$ forwardSlash <|> pure False
-    if pathFollows
-      then do
-        parsedPath <- path
-        parsedQuery <- query
-        parsedFragment <- fragment
-        return (Iri parsedScheme parsedAuthority parsedHost parsedPort parsedPath parsedQuery parsedFragment)
-      else return (Iri parsedScheme parsedAuthority parsedHost parsedPort (Path mempty) (Query mempty) (Fragment mempty))
+    parsedPath <- path
+    parsedQuery <- query
+    parsedFragment <- fragment
+    return (Iri parsedScheme parsedAuthority parsedHost parsedPort parsedPath parsedQuery parsedFragment)
 
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
@@ -170,6 +166,15 @@ port =
 {-# INLINE path #-}
 path :: Parser Path
 path =
+  do
+    pathFollows <- True <$ forwardSlash <|> pure False
+    if pathFollows
+      then pathBody
+      else return (Path mempty)
+
+{-# INLINE pathBody #-}
+pathBody :: Parser Path
+pathBody =
   fmap Path (E.sepBy pathSegment (word8 47))
 
 {-# INLINE pathSegment #-}
@@ -213,15 +218,15 @@ query =
   do
     queryFollows <- True <$ question <|> pure False
     if queryFollows
-      then existingQuery
+      then queryBody
       else return (Query mempty)
 
 {-|
 The stuff after the question mark.
 -}
-{-# INLINABLE existingQuery #-}
-existingQuery :: Parser Query
-existingQuery =
+{-# INLINABLE queryBody #-}
+queryBody :: Parser Query
+queryBody =
   fmap Query (E.sepBy (queryPair (,)) ampersand)
 
 {-# INLINE queryPair #-}

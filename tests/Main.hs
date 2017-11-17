@@ -16,6 +16,12 @@ main =
   defaultMain $
   testGroup "All tests" $
   [
+    testCase "No path" $
+    assertEqual ""
+      (Right "https://ru.wikipedia.org?query")
+      (fmap C.iri
+        (D.url "https://ru.wikipedia.org?query"))
+    ,
     testCase "" $ do
       assertEqual ""
         (Right "https://ru.wikipedia.org/wiki/Баренцбург")

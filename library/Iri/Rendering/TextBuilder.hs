@@ -43,17 +43,15 @@ iri (Iri schemeValue authorityValue hostValue portValue pathValue queryValue fra
       char '@'
     MissingAuthority -> mempty) <>
   host hostValue <>
-  prependIfNotNull
+  (prependIfNotNull
     (char '/')
-    (mappend
-      (mappend
-        (path pathValue)
-        (prependIfNotNull
-          (char '?')
-          (query queryValue)))
-      (prependIfNotNull
-        (char '#')
-        (fragment fragmentValue)))
+    (path pathValue)) <>
+  (prependIfNotNull
+    (char '?')
+    (query queryValue)) <>
+  (prependIfNotNull
+    (char '#')
+    (fragment fragmentValue))
 
 scheme :: Scheme -> Builder
 scheme (Scheme bytes) =
