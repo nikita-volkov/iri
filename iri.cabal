@@ -59,7 +59,7 @@ library
     Iri.PercentEncoding
   build-depends:
     unordered-containers >=0.2 && <0.3,
-    ptr >=0.16 && <0.17,
+    ptr >=0.16.1 && <0.17,
     attoparsec >=0.13 && <0.14,
     punycode >=2 && <3,
     ip >=1.1 && <2,

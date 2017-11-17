@@ -27,10 +27,6 @@ import qualified Iri.Utf8CodePoint as K
 import qualified Iri.Rendering.Poke as L
 
 
-null :: Poking -> Bool
-null (Poking size _) =
-  size == 0
-
 prependIfNotNull :: Poking -> Poking -> Poking
 prependIfNotNull prepended it =
   if null it
