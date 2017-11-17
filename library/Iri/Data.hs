@@ -2,7 +2,7 @@ module Iri.Data
 where
 
 import Iri.Prelude
-import qualified Data.Vector.Unboxed as A
+import qualified Language.Haskell.TH.Lift as B
 
 
 {-|
@@ -71,39 +71,52 @@ newtype Fragment =
 
 deriving instance Show Iri
 deriving instance Eq Iri
+B.deriveLift ''Iri
 
 deriving instance Show Scheme
 deriving instance Eq Scheme
+B.deriveLift ''Scheme
 
 deriving instance Show Authority
 deriving instance Eq Authority
+B.deriveLift ''Authority
 
 deriving instance Show User
 deriving instance Eq User
+B.deriveLift ''User
 
 deriving instance Show Password
 deriving instance Eq Password
+B.deriveLift ''Password
 
 deriving instance Show Host
 deriving instance Eq Host
+B.deriveLift ''Host
 
 deriving instance Show Idn
 deriving instance Eq Idn
+B.deriveLift ''Idn
 
 deriving instance Show DomainLabel
 deriving instance Eq DomainLabel
+B.deriveLift ''DomainLabel
 
 deriving instance Show Port
 deriving instance Eq Port
+B.deriveLift ''Port
 
 deriving instance Show Path
 deriving instance Eq Path
+B.deriveLift ''Path
 
 deriving instance Show PathSegment
 deriving instance Eq PathSegment
+B.deriveLift ''PathSegment
 
 deriving instance Show Query
 deriving instance Eq Query
+B.deriveLift ''Query
 
 deriving instance Show Fragment
 deriving instance Eq Fragment
+B.deriveLift ''Fragment

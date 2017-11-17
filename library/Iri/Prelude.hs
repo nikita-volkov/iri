@@ -43,7 +43,16 @@ import Data.Vector as Exports (Vector)
 -------------------------
 import Data.HashMap.Strict as Exports (HashMap)
 
+-- th-lift-instances
+-------------------------
+import Instances.TH.Lift as Exports
+
 -- bug
 -------------------------
 import Bug as Exports
 
+--------------------------------------------------------------------------------
+
+import qualified Language.Haskell.TH.Lift as A
+A.deriveLift ''IPv4
+A.deriveLift ''IPv6

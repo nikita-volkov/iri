@@ -49,6 +49,7 @@ library
     Iri.Rendering.ByteString.Ascii
     Iri.Parsing.ByteString
     Iri.Parsing.Attoparsec.ByteString
+    Iri.QuasiQuoter
   other-modules:
     Iri.Prelude
     Iri.Utf8CodePoint
@@ -59,6 +60,9 @@ library
     Iri.Rendering.Poke
     Iri.PercentEncoding
   build-depends:
+    th-lift-instances >=0.1.11 && <0.2,
+    th-lift >=0.7.7 && <0.8,
+    template-haskell >=2.9 && <3,
     unordered-containers >=0.2 && <0.3,
     ptr >=0.16.1 && <0.17,
     attoparsec >=0.13 && <0.14,
