@@ -45,7 +45,7 @@ library
     Iri.Data
     Iri.Rendering.Text
     Iri.Rendering.TextBuilder
-    Iri.Rendering.Poking.Ascii
+    Iri.Rendering.Ptr.Poking.Ascii
     Iri.Rendering.ByteString.Ascii
     Iri.Parsing.ByteString
     Iri.Parsing.Attoparsec.ByteString

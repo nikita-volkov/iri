@@ -1,4 +1,4 @@
-module Iri.Rendering.Poking.Ascii
+module Iri.Rendering.Ptr.Poking.Ascii
 (
   uri,
   scheme,
