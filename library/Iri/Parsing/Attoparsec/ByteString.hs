@@ -9,17 +9,18 @@ import Iri.Data
 import Data.Attoparsec.ByteString hiding (try)
 import qualified Data.Attoparsec.ByteString.Char8 as F
 import qualified Data.ByteString as K
-import qualified Data.Text as R
+import qualified Data.Text as T
 import qualified Data.Text.Punycode as A
 import qualified Data.Text.Encoding as B
 import qualified Data.Text.Encoding.Error as L
 import qualified Data.HashMap.Strict as O
+import qualified Data.Vector as S
 import qualified VectorBuilder.Builder as P
 import qualified VectorBuilder.Vector as Q
+import qualified VectorBuilder.MonadPlus as E
 import qualified Iri.PercentEncoding as I
 import qualified Iri.CodePointPredicates.Rfc3986 as C
 import qualified Iri.MonadPlus as R
-import qualified VectorBuilder.MonadPlus as E
 import qualified Ptr.Poking as G
 import qualified Ptr.ByteString as H
 import qualified Text.Builder as J
@@ -175,7 +176,15 @@ path =
 {-# INLINE pathBody #-}
 pathBody :: Parser Path
 pathBody =
-  fmap Path (E.sepBy pathSegment (word8 47))
+  do
+    segments <- E.sepBy pathSegment (word8 47)
+    if segmentsAreEmpty segments
+      then return (Path mempty)
+      else return (Path segments)
+  where
+    segmentsAreEmpty segments =
+      S.length segments == 1 &&
+      (case S.unsafeHead segments of PathSegment headSegmentText -> T.null headSegmentText)
 
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
@@ -234,7 +243,7 @@ queryPair :: (Text -> Text -> a) -> Parser a
 queryPair result =
   do
     !key <- urlEncodedComponent (C.unencodedQueryComponent . fromIntegral)
-    when (R.null key) (fail "Key is empty")
+    when (T.null key) (fail "Key is empty")
     optional (string "[]")
     !value <- (equality *> urlEncodedComponent (C.unencodedQueryComponent . fromIntegral)) <|> pure ""
     return (result key value)
