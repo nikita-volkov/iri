@@ -7,7 +7,7 @@ import Test.Tasty.Runners
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
 import qualified Iri.Data as A
-import qualified Iri.Attoparsec.ByteString as D
+import qualified Iri.Parsing.Attoparsec.ByteString as D
 import qualified Iri.Rendering.Text as C
 import qualified Iri.Rendering.Poking.Ascii as E
 import qualified Data.Attoparsec.ByteString as B

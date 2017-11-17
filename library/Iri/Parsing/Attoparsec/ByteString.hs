@@ -1,4 +1,4 @@
-module Iri.Attoparsec.ByteString
+module Iri.Parsing.Attoparsec.ByteString
 (
   url,
 )
