@@ -47,6 +47,7 @@ library
     Iri.Rendering.TextBuilder
     Iri.Rendering.Poking.Ascii
     Iri.Rendering.ByteString.Ascii
+    Iri.Parsing.ByteString
     Iri.Parsing.Attoparsec.ByteString
   other-modules:
     Iri.Prelude
@@ -88,8 +89,6 @@ test-suite tests
   build-depends:
     -- 
     iri,
-    attoparsec,
-    ptr,
     -- testing:
     tasty >=0.12 && <0.13,
     tasty-quickcheck >=0.9 && <0.10,
