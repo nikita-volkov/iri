@@ -31,21 +31,10 @@ appendIfNotNull appended it =
     else it <> appended
 
 iri :: Iri -> Builder
-iri (Iri schemeValue authorityValue hostValue portValue pathValue queryValue fragmentValue) =
+iri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
   scheme schemeValue <> 
-  text "://" <>
-  (case authorityValue of
-    PresentAuthority (User userValue) passwordValue ->
-      text userValue <>
-      (case passwordValue of
-        PresentPassword passwordText -> char ':' <> text passwordText
-        MissingPassword -> mempty) <>
-      char '@'
-    MissingAuthority -> mempty) <>
-  host hostValue <>
-  (prependIfNotNull
-    (char '/')
-    (path pathValue)) <>
+  char ':' <>
+  hierarchy hierarchyValue <>
   (prependIfNotNull
     (char '?')
     (query queryValue)) <>
@@ -57,15 +46,39 @@ scheme :: Scheme -> Builder
 scheme (Scheme bytes) =
   text (A.decodeUtf8With A.lenientDecode bytes)
 
+hierarchy :: Hierarchy -> Builder
+hierarchy =
+  \ case
+    AuthorisedHierarchy authorityValue pathSegmentsValue ->
+      string "//" <> authority authorityValue <> prependIfNotNull (char '/') (pathSegments pathSegmentsValue)
+    AbsoluteHierarchy pathSegmentsValue ->
+      char '/' <> pathSegments pathSegmentsValue
+    RelativeHierarchy pathSegmentsValue ->
+      pathSegments pathSegmentsValue
+
+authority :: Authority -> Builder
+authority (Authority userInfoValue hostValue portValue) =
+  appendIfNotNull (char '@') (userInfo userInfoValue) <>
+  host hostValue <>
+  prependIfNotNull (char ':') (port portValue)
+
+userInfo :: UserInfo -> Builder
+userInfo =
+  \ case
+    PresentUserInfo (User user) password -> case password of
+      PresentPassword password -> text user <> char ':'  <> text password
+      MissingPassword -> text user
+    MissingUserInfo -> mempty
+
 host :: Host -> Builder
 host =
   \ case
-    NamedHost value -> idn value
+    NamedHost value -> domainName value
     IpV4Host value -> ipV4 value
     IpV6Host value -> ipV6 value
 
-idn :: Idn -> Builder
-idn (Idn vector) =
+domainName :: RegName -> Builder
+domainName (RegName vector) =
   F.intercalate domainLabel (char '.') vector
 
 domainLabel :: DomainLabel -> Builder
@@ -80,8 +93,14 @@ ipV6 :: IPv6 -> Builder
 ipV6 =
   text . E.encode
 
-path :: Path -> Builder
-path (Path pathSegmentVector) =
+port :: Port -> Builder
+port =
+  \ case
+    PresentPort value -> integral value
+    MissingPort -> mempty
+
+pathSegments :: PathSegments -> Builder
+pathSegments (PathSegments pathSegmentVector) =
   F.intercalate pathSegment (char '/') pathSegmentVector
 
 pathSegment :: PathSegment -> Builder
@@ -89,11 +108,8 @@ pathSegment (PathSegment value) =
   text value
 
 query :: Query -> Builder
-query (Query map) =
-  F.intercalate
-    (\ (key, value) -> text key <> prependIfNotNull (char '=') (text value))
-    (char '&')
-    map
+query (Query value) =
+  text value
 
 fragment :: Fragment -> Builder
 fragment (Fragment value) =

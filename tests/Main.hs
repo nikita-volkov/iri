@@ -20,19 +20,19 @@ main =
     assertEqual ""
       (Right "https://ru.wikipedia.org?query")
       (fmap C.iri
-        (D.url "https://ru.wikipedia.org?query"))
+        (D.uri "https://ru.wikipedia.org?query"))
     ,
     testCase "" $ do
       assertEqual ""
         (Right "https://ru.wikipedia.org/wiki/Баренцбург")
         (fmap C.iri
-          (D.url "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3"))
+          (D.uri "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3"))
     ,
     testCase "" $ do
       assertEqual ""
         (Right "https://news.yandex.ru/yandsearch?cl4url=iz.ru/669426/2017-11-10/smi-inoagenty-obiazhut-soobshchat-ob-etom-v-sotcsetiakh&lang=ru&from=main_portal&stid=5bdMOjSopWu34pdT-391&lr=213&msid=1510328052.50316.22874.7658&mlid=1510327228.glob_225.904af5bb")
         (fmap C.iri
-          (D.url "https://news.yandex.ru/yandsearch?cl4url=iz.ru/669426/2017-11-10/smi-inoagenty-obiazhut-soobshchat-ob-etom-v-sotcsetiakh&lang=ru&from=main_portal&stid=5bdMOjSopWu34pdT-391&lr=213&msid=1510328052.50316.22874.7658&mlid=1510327228.glob_225.904af5bb"))
+          (D.uri "https://news.yandex.ru/yandsearch?cl4url=iz.ru/669426/2017-11-10/smi-inoagenty-obiazhut-soobshchat-ob-etom-v-sotcsetiakh&lang=ru&from=main_portal&stid=5bdMOjSopWu34pdT-391&lr=213&msid=1510328052.50316.22874.7658&mlid=1510327228.glob_225.904af5bb"))
     ,
     testCase "" $
     let
@@ -45,6 +45,6 @@ main =
       in
         forM_ inputs $ \ input ->
         let
-          Right iri = D.url input
+          Right iri = D.uri input
           in assertEqual "" input (E.uri iri)
   ]

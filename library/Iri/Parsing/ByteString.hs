@@ -1,6 +1,6 @@
 module Iri.Parsing.ByteString
 (
-  url,
+  uri,
 )
 where
 
@@ -10,7 +10,11 @@ import qualified Iri.Parsing.Attoparsec.ByteString as A
 import qualified Data.Attoparsec.ByteString as B
 
 
-url :: ByteString -> Either Text Iri
-url =
+{-|
+Parser of a well-formed URI conforming to the RFC3986 standard into IRI.
+Performs URL- and Punycode-decoding.
+-}
+uri :: ByteString -> Either Text Iri
+uri =
   either (Left . fromString) Right .
-  B.parseOnly A.url
+  B.parseOnly (A.uri <* B.endOfInput)

@@ -1,6 +1,6 @@
 module Iri.Parsing.Attoparsec.ByteString
 (
-  url,
+  uri,
 )
 where
 
@@ -73,42 +73,72 @@ semicolon :: Parser Word8
 semicolon =
   word8 59
 
+{-# INLINE labeled #-}
+labeled :: String -> Parser a -> Parser a
+labeled label parser =
+  parser <?> label
+
 {-|
-Parser of a well-formed URL conforming to the RFC1738 standard into IRI.
+Parser of a well-formed URI conforming to the RFC3986 standard into IRI.
+Performs URL- and Punycode-decoding.
 -}
-url :: Parser Iri
-url =
-  do
+{-# INLINABLE uri #-}
+uri :: Parser Iri
+uri =
+  labeled "URI" $ do
     parsedScheme <- scheme
-    string "://"
-    parsedAuthority <- (presentAuthority PresentAuthority <* at) <|> pure MissingAuthority
-    parsedHost <- host
-    parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
-    parsedPath <- path
+    colon
+    parsedHierarchy <- hierarchy
     parsedQuery <- query
     parsedFragment <- fragment
-    return (Iri parsedScheme parsedAuthority parsedHost parsedPort parsedPath parsedQuery parsedFragment)
+    return (Iri parsedScheme parsedHierarchy parsedQuery parsedFragment)
+
+{-# INLINE hierarchy #-}
+hierarchy :: Parser Hierarchy
+hierarchy =
+  do
+    slashPresent <- forwardSlash $> True <|> pure False
+    if slashPresent
+      then do
+        slashPresent <- forwardSlash $> True <|> pure False
+        if slashPresent
+          then authorisedHierarchyBody AuthorisedHierarchy
+          else AbsoluteHierarchy <$> pathSegments
+      else RelativeHierarchy <$> pathSegments
+
+{-# INLINE authorisedHierarchyBody #-}
+authorisedHierarchyBody :: (Authority -> PathSegments -> body) -> Parser body
+authorisedHierarchyBody body =
+  do
+    parsedUserInfo <- (presentUserInfo PresentUserInfo <* at) <|> pure MissingUserInfo
+    parsedHost <- host
+    parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
+    parsedPathSegments <- (forwardSlash *> pathSegments) <|> pure (PathSegments mempty)
+    return (body (Authority parsedUserInfo parsedHost parsedPort) parsedPathSegments)
 
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
 scheme =
+  labeled "Scheme" $
   fmap Scheme (takeWhile1 (C.scheme . fromIntegral))
 
-{-# INLINABLE presentAuthority #-}
-presentAuthority :: (User -> Password -> a) -> Parser a
-presentAuthority result =
+{-# INLINABLE presentUserInfo #-}
+presentUserInfo :: (User -> Password -> a) -> Parser a
+presentUserInfo result =
+  labeled "User info" $
   do
-    user <- User <$> urlEncodedComponent (C.unencodedPathSegment . fromIntegral)
+    user <- User <$> urlEncodedString (C.unencodedPathSegment . fromIntegral)
     passwordFollows <- True <$ colon <|> pure False
     if passwordFollows
       then do
-        password <- PresentPassword <$> urlEncodedComponent (C.unencodedPathSegment . fromIntegral)
+        password <- PresentPassword <$> urlEncodedString (C.unencodedPathSegment . fromIntegral)
         return (result user password)
       else return (result user MissingPassword)
 
 {-# INLINE host #-}
 host :: Parser Host
 host =
+  labeled "Host" $
   IpV6Host <$> ipV6 <|>
   IpV4Host <$> M.parserUtf8 <|>
   NamedHost <$> domainName
@@ -140,9 +170,9 @@ ipV6 =
         return (N.fromWord16s a b c d 0 0 0 0))
 
 {-# INLINE domainName #-}
-domainName :: Parser Idn
+domainName :: Parser RegName
 domainName =
-  fmap Idn (E.sepBy1 domainLabel (word8 46))
+  fmap RegName (E.sepBy1 domainLabel (word8 46))
 
 {-|
 Domain label with Punycode decoding applied.
@@ -150,7 +180,7 @@ Domain label with Punycode decoding applied.
 {-# INLINE domainLabel #-}
 domainLabel :: Parser DomainLabel
 domainLabel =
-  do
+  labeled "Domain label" $ do
     punycodeFollows <- True <$ string "xn--" <|> pure False
     ascii <- takeWhile1 (C.domainLabel . fromIntegral)
     if punycodeFollows
@@ -167,20 +197,17 @@ port =
 {-# INLINE path #-}
 path :: Parser Path
 path =
-  do
-    pathFollows <- True <$ forwardSlash <|> pure False
-    if pathFollows
-      then pathBody
-      else return (Path mempty)
+  (forwardSlash *> (AbsolutePath <$> pathSegments)) <|>
+  (RelativePath <$> pathSegments)
 
-{-# INLINE pathBody #-}
-pathBody :: Parser Path
-pathBody =
+{-# INLINE pathSegments #-}
+pathSegments :: Parser PathSegments
+pathSegments =
   do
-    segments <- E.sepBy pathSegment (word8 47)
+    segments <- E.sepBy pathSegment forwardSlash
     if segmentsAreEmpty segments
-      then return (Path mempty)
-      else return (Path segments)
+      then return (PathSegments mempty)
+      else return (PathSegments segments)
   where
     segmentsAreEmpty segments =
       S.length segments == 1 &&
@@ -189,11 +216,12 @@ pathBody =
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
 pathSegment =
-  fmap PathSegment (urlEncodedComponent (C.unencodedPathSegment . fromIntegral))
+  fmap PathSegment (urlEncodedString (C.unencodedPathSegment . fromIntegral))
 
-{-# INLINABLE urlEncodedComponent #-}
-urlEncodedComponent :: (Word8 -> Bool) -> Parser Text
-urlEncodedComponent unencodedBytesPredicate =
+{-# INLINABLE urlEncodedString #-}
+urlEncodedString :: (Word8 -> Bool) -> Parser Text
+urlEncodedString unencodedBytesPredicate =
+  labeled "URL-encoded string" $
   R.foldlM progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
   where
     progress (!builder, _, decode) bytes =
@@ -224,11 +252,8 @@ percentEncodedByte =
 {-# INLINABLE query #-}
 query :: Parser Query
 query =
-  do
-    queryFollows <- True <$ question <|> pure False
-    if queryFollows
-      then queryBody
-      else return (Query mempty)
+  labeled "Query" $
+  (question *> queryBody) <|> pure (Query mempty)
 
 {-|
 The stuff after the question mark.
@@ -236,23 +261,21 @@ The stuff after the question mark.
 {-# INLINABLE queryBody #-}
 queryBody :: Parser Query
 queryBody =
-  fmap Query (E.sepBy (queryPair (,)) ampersand)
+  fmap Query (urlEncodedString (C.unencodedQuery . fromIntegral))
 
-{-# INLINE queryPair #-}
+{-# INLINABLE queryPair #-}
 queryPair :: (Text -> Text -> a) -> Parser a
 queryPair result =
   do
-    !key <- urlEncodedComponent (C.unencodedQueryComponent . fromIntegral)
+    !key <- urlEncodedString (C.unencodedQueryComponent . fromIntegral)
     when (T.null key) (fail "Key is empty")
     optional (string "[]")
-    !value <- (equality *> urlEncodedComponent (C.unencodedQueryComponent . fromIntegral)) <|> pure ""
+    !value <- (equality *> urlEncodedString (C.unencodedQueryComponent . fromIntegral)) <|> pure ""
     return (result key value)
 
 {-# INLINABLE fragment #-}
 fragment :: Parser Fragment
 fragment =
-  do
-    fragmentFollows <- True <$ hash <|> pure False
-    if fragmentFollows
-      then Fragment <$> urlEncodedComponent (C.unencodedFragment . fromIntegral)
-      else return (Fragment mempty)
+  labeled "Fragment" $
+  (hash *> (Fragment <$> urlEncodedString (C.unencodedFragment . fromIntegral))) <|>
+  pure (Fragment mempty)

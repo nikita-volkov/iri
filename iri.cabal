@@ -42,7 +42,6 @@ library
   default-language:
     Haskell2010
   exposed-modules:
-    Iri.Data
     Iri.Rendering.Text
     Iri.Rendering.TextBuilder
     Iri.Rendering.Ptr.Poking.Ascii
@@ -50,6 +49,7 @@ library
     Iri.Parsing.ByteString
     Iri.Parsing.Attoparsec.ByteString
     Iri.QuasiQuoter
+    Iri.Data
   other-modules:
     Iri.Prelude
     Iri.Utf8CodePoint
@@ -69,7 +69,7 @@ library
     punycode >=2 && <3,
     ip >=1.1 && <2,
     text ==1.*,
-    text-builder >=0.4.2 && <0.5,
+    text-builder >=0.4.3 && <0.5,
     bytestring >=0.10 && <0.11,
     vector >=0.10 && <0.13,
     vector-builder >=0.3.4 && <0.4,

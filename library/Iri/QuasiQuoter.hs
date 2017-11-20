@@ -10,10 +10,10 @@ import qualified Data.Attoparsec.ByteString as B
 
 
 {-|
-Parse URL.
+Parse URI.
 -}
-url :: QuasiQuoter
-url =
+uri :: QuasiQuoter
+uri =
   QuasiQuoter {
     quoteExp = exp,
     quotePat = unsupported,
@@ -24,7 +24,7 @@ url =
     unsupported _ =
       fail "Not supported"
     exp string =
-      case B.parseOnly (A.url <* B.endOfInput) (fromString string) of
+      case B.parseOnly (A.uri <* B.endOfInput) (fromString string) of
         Right iri -> lift iri
-        Left error -> fail (showString "IRI parsing: " error)
+        Left error -> fail (showString "URI parsing: " error)
       

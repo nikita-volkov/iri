@@ -1,11 +1,6 @@
 module Iri.Rendering.Ptr.Poking.Ascii
 (
   uri,
-  scheme,
-  host,
-  pathAndQuery,
-  path,
-  query,
 )
 where
 
@@ -46,35 +41,21 @@ urlEncodedText unencodedPredicate =
 
 urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Poking
 urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
-  if codePoint < 128 && unencodedPredicate codePoint
-    then word8 (fromIntegral codePoint)
-    else 
-      K.unicodeCodePoint codePoint
-        (\ b1 -> urlEncodedByte b1)
-        (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
-        (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
-        (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
+  K.unicodeCodePoint codePoint
+    (\ b1 -> if unencodedPredicate codePoint then word8 b1 else urlEncodedByte b1)
+    (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
+    (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
+    (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
 
 urlEncodedByte :: Word8 -> Poking
 urlEncodedByte =
   poke L.urlEncodedByte
 
 uri :: Iri -> Poking
-uri (Iri schemeValue authorityValue hostValue portValue pathValue queryValue fragmentValue) =
+uri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
   scheme schemeValue <> 
-  bytes "://" <>
-  (case authorityValue of
-    PresentAuthority (User userValue) passwordValue ->
-      userInfoComponent userValue <>
-      (case passwordValue of
-        PresentPassword passwordValue -> asciiChar ':' <> userInfoComponent passwordValue
-        MissingPassword -> mempty) <>
-      asciiChar '@'
-    MissingAuthority -> mempty) <>
-  host hostValue <>
-  (prependIfNotNull
-    (asciiChar '/')
-    (path pathValue)) <>
+  asciiChar ':' <>
+  hierarchy hierarchyValue <>
   (prependIfNotNull
     (asciiChar '?')
     (query queryValue)) <>
@@ -86,6 +67,30 @@ scheme :: Scheme -> Poking
 scheme (Scheme value) =
   bytes value
 
+hierarchy :: Hierarchy -> Poking
+hierarchy =
+  \ case
+    AuthorisedHierarchy authorityValue pathSegmentsValue ->
+      bytes "//" <> authority authorityValue <> prependIfNotNull (asciiChar '/') (pathSegments pathSegmentsValue)
+    AbsoluteHierarchy pathSegmentsValue ->
+      asciiChar '/' <> pathSegments pathSegmentsValue
+    RelativeHierarchy pathSegmentsValue ->
+      pathSegments pathSegmentsValue
+
+authority :: Authority -> Poking
+authority (Authority userInfoValue hostValue portValue) =
+  appendIfNotNull (asciiChar '@') (userInfo userInfoValue) <>
+  host hostValue <>
+  prependIfNotNull (asciiChar ':') (port portValue)
+
+userInfo :: UserInfo -> Poking
+userInfo =
+  \ case
+    PresentUserInfo (User user) password -> case password of
+      PresentPassword password -> userInfoComponent user <> asciiChar ':'  <> userInfoComponent password
+      MissingPassword -> userInfoComponent user
+    MissingUserInfo -> mempty
+
 userInfoComponent :: Text -> Poking
 userInfoComponent =
   urlEncodedText I.unencodedUserInfoComponent
@@ -93,12 +98,12 @@ userInfoComponent =
 host :: Host -> Poking
 host =
   \ case
-    NamedHost value -> idn value
+    NamedHost value -> domainName value
     IpV4Host value -> ipV4 value
     IpV6Host value -> ipV6 value
 
-idn :: Idn -> Poking
-idn (Idn vector) =
+domainName :: RegName -> Poking
+domainName (RegName vector) =
   F.intercalate domainLabel (asciiChar '.') vector
 
 domainLabel :: DomainLabel -> Poking
@@ -115,8 +120,14 @@ ipV6 :: IPv6 -> Poking
 ipV6 =
   bytes . A.encodeUtf8 . E.encode
 
-path :: Path -> Poking
-path (Path pathSegmentVector) =
+port :: Port -> Poking
+port =
+  \ case
+    PresentPort value -> asciiIntegral value
+    MissingPort -> mempty
+
+pathSegments :: PathSegments -> Poking
+pathSegments (PathSegments pathSegmentVector) =
   F.intercalate pathSegment (asciiChar '/') pathSegmentVector
 
 pathSegment :: PathSegment -> Poking
@@ -125,22 +136,8 @@ pathSegment (PathSegment value) =
 
 query :: Query -> Poking
 query (Query value) =
-  F.intercalate
-    (\ (!key, !value) -> queryComponent key <> prependIfNotNull (asciiChar '=') (queryComponent value))
-    (asciiChar '&')
-    value
-
-queryComponent :: Text -> Poking
-queryComponent value =
-  urlEncodedText I.unencodedQueryComponent value
+  urlEncodedText I.unencodedQuery value
 
 fragment :: Fragment -> Poking
 fragment (Fragment value) =
   urlEncodedText I.unencodedFragment value
-
-{-|
-Useful for HTTP requests.
--}
-pathAndQuery :: Path -> Query -> Poking
-pathAndQuery pathValue queryValue =
-  asciiChar '/' <> path pathValue <> asciiChar '?' <> query queryValue
