@@ -84,6 +84,13 @@ newtype Fragment =
 HTTP being by far the most common use-case for resource identifiers,
 it's been isolated into a dedicated data-type,
 which is optimised for that particular case.
+
+Compared to the general IRI definition it:
+
+* only supports the HTTP and HTTPS schemes
+* misses the Username and Password components
+* requires the Host component
+* requires the Path component to be absolute
 -}
 data HttpIri =
   HttpIri !Security !Host !Port !PathSegments !Query !Fragment
