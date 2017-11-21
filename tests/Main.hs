@@ -23,19 +23,19 @@ main =
       (fmap C.iri
         (D.uri "https://ru.wikipedia.org?query"))
     ,
-    testCase "" $ do
+    testCase "Cyrillic path" $ do
       assertEqual ""
         (Right "https://ru.wikipedia.org/wiki/Баренцбург")
         (fmap C.iri
           (D.uri "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3"))
     ,
-    testCase "" $ do
+    testCase "Complex query" $ do
       assertEqual ""
         (Right "https://news.yandex.ru/yandsearch?cl4url=iz.ru/669426/2017-11-10/smi-inoagenty-obiazhut-soobshchat-ob-etom-v-sotcsetiakh&lang=ru&from=main_portal&stid=5bdMOjSopWu34pdT-391&lr=213&msid=1510328052.50316.22874.7658&mlid=1510327228.glob_225.904af5bb")
         (fmap C.iri
           (D.uri "https://news.yandex.ru/yandsearch?cl4url=iz.ru/669426/2017-11-10/smi-inoagenty-obiazhut-soobshchat-ob-etom-v-sotcsetiakh&lang=ru&from=main_portal&stid=5bdMOjSopWu34pdT-391&lr=213&msid=1510328052.50316.22874.7658&mlid=1510327228.glob_225.904af5bb"))
     ,
-    testCase "" $
+    testCase "Rendering" $
     let
       inputs =
         [
@@ -53,7 +53,7 @@ main =
     ,
     testCase "Empty hierarchy" $ assertEqual "" "about:" (E.uri [uri|about:|])
     ,
-    testCase "HTTP URI" $
+    testCase "HTTP URI Text Rendering" $
     assertEqual ""
       "https://ru.wikipedia.org/wiki/Баренцбург"
       (C.httpIri [httpUri|https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3|])
