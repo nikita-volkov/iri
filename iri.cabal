@@ -56,6 +56,9 @@ library
     Iri.QuasiQuoter
     Iri.Data
   other-modules:
+    Iri.Rendering.Text.Internal
+    Iri.Rendering.TextBuilder.Internal
+    Iri.Data.Internal
     Iri.Prelude
     Iri.Utf8CodePoint
     Iri.Vector
@@ -63,6 +66,9 @@ library
     Iri.CodePointPredicates.Core
     Iri.CodePointPredicates.Rfc3986
     Iri.CodePointPredicates.Rfc3987
+    Iri.Instances.Lift
+    Iri.Instances.Show
+    Iri.Instances.Eq
     Iri.Rendering.Poke
     Iri.PercentEncoding
   build-depends:
