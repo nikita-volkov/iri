@@ -52,5 +52,10 @@ main =
     testCase "about:blank" $ assertEqual "" "about:blank" (E.uri [uri|about:blank|])
     ,
     testCase "Empty hierarchy" $ assertEqual "" "about:" (E.uri [uri|about:|])
+    ,
+    testCase "HTTP URI" $
+    assertEqual ""
+      "https://ru.wikipedia.org/wiki/Баренцбург"
+      (C.httpIri [httpUri|https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3|])
   ]
 

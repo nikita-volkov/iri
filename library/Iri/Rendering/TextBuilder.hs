@@ -1,6 +1,7 @@
 module Iri.Rendering.TextBuilder
 (
   iri,
+  httpIri,
 )
 where
 
@@ -41,6 +42,15 @@ iri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
   (prependIfNotNull
     (char '#')
     (fragment fragmentValue))
+
+httpIri :: HttpIri -> Builder
+httpIri (HttpIri (Security secure) hostValue portValue pathSegmentsValue queryValue fragmentValue) =
+  (if secure then string "https://" else string "http://") <>
+  host hostValue <>
+  prependIfNotNull (char ':') (port portValue) <>
+  prependIfNotNull (char '/') (pathSegments pathSegmentsValue) <>
+  prependIfNotNull (char '?') (query queryValue) <>
+  prependIfNotNull (char '#') (fragment fragmentValue)
 
 scheme :: Scheme -> Builder
 scheme (Scheme bytes) =

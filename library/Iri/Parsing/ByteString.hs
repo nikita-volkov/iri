@@ -18,3 +18,11 @@ uri :: ByteString -> Either Text Iri
 uri =
   either (Left . fromString) Right .
   B.parseOnly (A.uri <* B.endOfInput)
+
+{-|
+Same as 'uri', but optimized specifially for the case of HTTP URIs.
+-}
+httpUri :: ByteString -> Either Text HttpIri
+httpUri =
+  either (Left . fromString) Right .
+  B.parseOnly (A.httpUri <* B.endOfInput)

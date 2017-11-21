@@ -1,6 +1,7 @@
 module Iri.Parsing.Attoparsec.ByteString
 (
   uri,
+  httpUri,
 )
 where
 
@@ -92,6 +93,26 @@ uri =
     parsedQuery <- query
     parsedFragment <- fragment
     return (Iri parsedScheme parsedHierarchy parsedQuery parsedFragment)
+
+{-|
+Same as 'uri', but optimized specifially for the case of HTTP URIs.
+-}
+{-# INLINABLE httpUri #-}
+httpUri :: Parser HttpIri
+httpUri =
+  labeled "HTTP URI" $ do
+    satisfy (\ x -> x == 104 || x == 72)
+    satisfy (\ x -> x == 116 || x == 84)
+    satisfy (\ x -> x == 116 || x == 84)
+    satisfy (\ x -> x == 112 || x == 80)
+    secure <- satisfy (\ b -> b == 115 || b == 83) $> True <|> pure False
+    string "://"
+    parsedHost <- host
+    parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
+    parsedPathSegments <- (forwardSlash *> pathSegments) <|> pure (PathSegments mempty)
+    parsedQuery <- query
+    parsedFragment <- fragment
+    return (HttpIri (Security secure) parsedHost parsedPort parsedPathSegments parsedQuery parsedFragment)
 
 {-# INLINE hierarchy #-}
 hierarchy :: Parser Hierarchy

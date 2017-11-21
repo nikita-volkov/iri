@@ -11,3 +11,8 @@ import qualified Text.Builder as B
 iri :: Iri -> Text
 iri =
   B.run . A.iri
+
+{-| Render as a Unicode IRI text -}
+httpIri :: HttpIri -> Text
+httpIri =
+  B.run . A.httpIri
