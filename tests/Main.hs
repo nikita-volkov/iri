@@ -6,6 +6,7 @@ import Test.Tasty
 import Test.Tasty.Runners
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
+import Iri.QuasiQuoter
 import qualified Iri.Data as A
 import qualified Iri.Parsing.ByteString as D
 import qualified Iri.Rendering.Text as C
@@ -47,4 +48,9 @@ main =
         let
           Right iri = D.uri input
           in assertEqual "" input (E.uri iri)
+    ,
+    testCase "about:blank" $ assertEqual "" "about:blank" (E.uri [uri|about:blank|])
+    ,
+    testCase "Empty hierarchy" $ assertEqual "" "about:" (E.uri [uri|about:|])
   ]
+
