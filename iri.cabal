@@ -5,10 +5,15 @@ version:
 category:
   IRI, URI, URL, Data, Network
 synopsis:
-  International Resource Identifier library
+  RFC-based International Resource Identifier library
 description:
-  A data-type with space-efficient representation for both URI (URL) and IRI and
-  utilities for it.
+  This library provides a universal data model for representation of both URI (URL) and IRI.
+  It comes packed with parsing, rendering and serialisation functionality.
+  It is implemented in conformance with the RFC-3986 and RFC-3987 specifications and
+  is intended as a standard tool for all tasks related to resource identifiers.
+  .
+  The data is represented in Unicode,
+  and the API automates all the encoding fuss.
 homepage:
   https://github.com/nikita-volkov/iri 
 bug-reports:
