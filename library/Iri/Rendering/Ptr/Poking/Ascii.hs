@@ -22,35 +22,6 @@ import qualified Iri.Utf8CodePoint as K
 import qualified Iri.Rendering.Poke as L
 
 
-prependIfNotNull :: Poking -> Poking -> Poking
-prependIfNotNull prepended it =
-  if null it
-    then mempty
-    else prepended <> it
-
-appendIfNotNull :: Poking -> Poking -> Poking
-appendIfNotNull appended it =
-  if null it
-    then mempty
-    else it <> appended
-
-{-| Apply URL-encoding to text -}
-urlEncodedText :: I.Predicate -> Text -> Poking
-urlEncodedText unencodedPredicate =
-  C.foldl' (\ poking -> mappend poking . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
-
-urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Poking
-urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
-  K.unicodeCodePoint codePoint
-    (\ b1 -> if unencodedPredicate codePoint then word8 b1 else urlEncodedByte b1)
-    (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
-    (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
-    (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
-
-urlEncodedByte :: Word8 -> Poking
-urlEncodedByte =
-  poke L.urlEncodedByte
-
 uri :: Iri -> Poking
 uri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
   scheme schemeValue <> 
@@ -87,7 +58,7 @@ userInfo :: UserInfo -> Poking
 userInfo =
   \ case
     PresentUserInfo (User user) password -> case password of
-      PresentPassword password -> userInfoComponent user <> asciiChar ':'  <> userInfoComponent password
+      PresentPassword password -> userInfoComponent user <> asciiChar ':' <> userInfoComponent password
       MissingPassword -> userInfoComponent user
     MissingUserInfo -> mempty
 
@@ -141,3 +112,32 @@ query (Query value) =
 fragment :: Fragment -> Poking
 fragment (Fragment value) =
   urlEncodedText I.unencodedFragment value
+
+{-| Apply URL-encoding to text -}
+urlEncodedText :: I.Predicate -> Text -> Poking
+urlEncodedText unencodedPredicate =
+  C.foldl' (\ poking -> mappend poking . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
+
+urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Poking
+urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
+  K.unicodeCodePoint codePoint
+    (\ b1 -> if unencodedPredicate codePoint then word8 b1 else urlEncodedByte b1)
+    (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
+    (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
+    (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
+
+urlEncodedByte :: Word8 -> Poking
+urlEncodedByte =
+  poke L.urlEncodedByte
+
+prependIfNotNull :: Poking -> Poking -> Poking
+prependIfNotNull prepended it =
+  if null it
+    then mempty
+    else prepended <> it
+
+appendIfNotNull :: Poking -> Poking -> Poking
+appendIfNotNull appended it =
+  if null it
+    then mempty
+    else it <> appended

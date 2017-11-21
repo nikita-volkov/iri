@@ -17,19 +17,10 @@ import qualified Data.Vector as H
 import qualified Net.IPv4 as D
 import qualified Net.IPv6 as E
 import qualified Iri.Vector as F
+import qualified Iri.CodePointPredicates.Core as I
+import qualified Iri.CodePointPredicates.Rfc3987 as I
+import qualified Iri.Utf8CodePoint as K
 
-
-prependIfNotNull :: Builder -> Builder -> Builder
-prependIfNotNull prepended it =
-  if null it
-    then mempty
-    else prepended <> it
-
-appendIfNotNull :: Builder -> Builder -> Builder
-appendIfNotNull appended it =
-  if null it
-    then mempty
-    else it <> appended
 
 iri :: Iri -> Builder
 iri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
@@ -76,9 +67,13 @@ userInfo :: UserInfo -> Builder
 userInfo =
   \ case
     PresentUserInfo (User user) password -> case password of
-      PresentPassword password -> text user <> char ':'  <> text password
-      MissingPassword -> text user
+      PresentPassword password -> userInfoComponent user <> char ':'  <> userInfoComponent password
+      MissingPassword -> userInfoComponent user
     MissingUserInfo -> mempty
+
+userInfoComponent :: Text -> Builder
+userInfoComponent =
+  urlEncodedText I.unencodedUserInfoComponent
 
 host :: Host -> Builder
 host =
@@ -106,7 +101,7 @@ ipV6 =
 port :: Port -> Builder
 port =
   \ case
-    PresentPort value -> integral value
+    PresentPort value -> unsignedDecimal value
     MissingPort -> mempty
 
 pathSegments :: PathSegments -> Builder
@@ -115,12 +110,46 @@ pathSegments (PathSegments pathSegmentVector) =
 
 pathSegment :: PathSegment -> Builder
 pathSegment (PathSegment value) =
-  text value
+  urlEncodedText I.unencodedPathSegment value
 
 query :: Query -> Builder
 query (Query value) =
-  text value
+  urlEncodedText I.unencodedQuery value
 
 fragment :: Fragment -> Builder
 fragment (Fragment value) =
-  text value
+  urlEncodedText I.unencodedFragment value
+
+{-| Apply URL-encoding to text -}
+urlEncodedText :: I.Predicate -> Text -> Builder
+urlEncodedText unencodedPredicate =
+  C.foldl' (\ builder -> mappend builder . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
+
+urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Builder
+urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
+  if unencodedPredicate codePoint
+    then
+      unicodeCodePoint codePoint
+    else
+      K.unicodeCodePoint codePoint
+        (\ b1 -> urlEncodedByte b1)
+        (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
+        (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
+        (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
+
+urlEncodedByte :: Word8 -> Builder
+urlEncodedByte x =
+  case divMod x 16 of
+    (d1, d2) -> char '%' <> hexadecimalDigit d1 <> hexadecimalDigit d2
+
+prependIfNotNull :: Builder -> Builder -> Builder
+prependIfNotNull prepended it =
+  if null it
+    then mempty
+    else prepended <> it
+
+appendIfNotNull :: Builder -> Builder -> Builder
+appendIfNotNull appended it =
+  if null it
+    then mempty
+    else it <> appended

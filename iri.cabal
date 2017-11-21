@@ -57,6 +57,7 @@ library
     Iri.MonadPlus
     Iri.CodePointPredicates.Core
     Iri.CodePointPredicates.Rfc3986
+    Iri.CodePointPredicates.Rfc3987
     Iri.Rendering.Poke
     Iri.PercentEncoding
   build-depends:
@@ -69,7 +70,7 @@ library
     punycode >=2 && <3,
     ip >=1.1 && <2,
     text ==1.*,
-    text-builder >=0.4.3 && <0.5,
+    text-builder >=0.5 && <0.6,
     bytestring >=0.10 && <0.11,
     vector >=0.10 && <0.13,
     vector-builder >=0.3.4 && <0.4,
