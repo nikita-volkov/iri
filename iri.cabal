@@ -55,6 +55,7 @@ library
     Iri.Parsing.Attoparsec.ByteString
     Iri.QuasiQuoter
     Iri.Data
+    Iri.Lenses
   other-modules:
     Iri.Rendering.Text.Internal
     Iri.Rendering.TextBuilder.Internal
