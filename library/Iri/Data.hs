@@ -9,7 +9,6 @@ module Iri.Data
 where
 
 import Iri.Prelude
-import qualified Language.Haskell.TH.Lift as B
 
 
 {-|
@@ -119,75 +118,3 @@ iriFromHttpIri (HttpIri (Security secure) host port pathSegments query fragment)
       Scheme (if secure then "https" else "http")
     hierarchy =
       AuthorisedHierarchy (Authority MissingUserInfo host port) pathSegments
-
-
--- * Instances
--------------------------
-
-deriving instance Show Iri
-deriving instance Eq Iri
-B.deriveLift ''Iri
-
-deriving instance Show Scheme
-deriving instance Eq Scheme
-B.deriveLift ''Scheme
-
-deriving instance Show Hierarchy
-deriving instance Eq Hierarchy
-B.deriveLift ''Hierarchy
-
-deriving instance Show Authority
-deriving instance Eq Authority
-B.deriveLift ''Authority
-
-deriving instance Show UserInfo
-deriving instance Eq UserInfo
-B.deriveLift ''UserInfo
-
-deriving instance Show User
-deriving instance Eq User
-B.deriveLift ''User
-
-deriving instance Show Password
-deriving instance Eq Password
-B.deriveLift ''Password
-
-deriving instance Show Host
-deriving instance Eq Host
-B.deriveLift ''Host
-
-deriving instance Show RegName
-deriving instance Eq RegName
-B.deriveLift ''RegName
-
-deriving instance Show DomainLabel
-deriving instance Eq DomainLabel
-B.deriveLift ''DomainLabel
-
-deriving instance Show Port
-deriving instance Eq Port
-B.deriveLift ''Port
-
-deriving instance Show PathSegments
-deriving instance Eq PathSegments
-B.deriveLift ''PathSegments
-
-deriving instance Show PathSegment
-deriving instance Eq PathSegment
-B.deriveLift ''PathSegment
-
-deriving instance Show Query
-deriving instance Eq Query
-B.deriveLift ''Query
-
-deriving instance Show Fragment
-deriving instance Eq Fragment
-B.deriveLift ''Fragment
-
-deriving instance Show HttpIri
-deriving instance Eq HttpIri
-B.deriveLift ''HttpIri
-
-deriving instance Show Security
-deriving instance Eq Security
-B.deriveLift ''Security

@@ -3,6 +3,7 @@ where
 
 import Iri.Prelude
 import Iri.Data
+import Iri.Instances.Lift
 import Language.Haskell.TH.Syntax
 import Language.Haskell.TH.Quote
 import qualified Iri.Parsing.Attoparsec.ByteString as A
