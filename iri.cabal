@@ -55,6 +55,7 @@ library
     Iri.Parsing.Attoparsec.ByteString
     Iri.QuasiQuoter
     Iri.Data
+    Iri.Lenses
   other-modules:
     Iri.Rendering.Text.Internal
     Iri.Rendering.TextBuilder.Internal
@@ -85,6 +86,7 @@ library
     bytestring >=0.10 && <0.11,
     vector >=0.10 && <0.13,
     vector-builder >=0.3.4 && <0.4,
+    profunctors >=5.2 && <6,
     contravariant >=1.4 && <2,
     semigroups >=0.18 && <0.20,
     bug ==1.*,
