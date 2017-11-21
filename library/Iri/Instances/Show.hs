@@ -2,8 +2,8 @@ module Iri.Instances.Show
 where
 
 import Iri.Prelude
-import Iri.Data
-import qualified Iri.Rendering.Text as A
+import Iri.Data.Internal
+import qualified Iri.Rendering.Text.Internal as A
 import qualified Data.Text as B
 
 
