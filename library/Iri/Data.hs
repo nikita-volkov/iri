@@ -3,8 +3,6 @@ References:
 
 * <https://tools.ietf.org/rfc/rfc3986.txt URI RFC>
 * <https://tools.ietf.org/rfc/rfc3987.txt IRI RFC>
-
-Notice that this datamodel doesn't define relative IRIs yet.
 -}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Iri.Data
