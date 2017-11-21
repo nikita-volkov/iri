@@ -18,9 +18,6 @@ Thorough structure of IRI.
 data Iri =
   Iri !Scheme !Hierarchy !Query !Fragment
 
-data RelativeIri =
-  RelativeIri !Hierarchy !Query !Fragment
-
 newtype Scheme =
   Scheme ByteString
 
@@ -57,10 +54,6 @@ newtype DomainLabel =
 data Port =
   PresentPort !Word16 |
   MissingPort
-
-data Path =
-  AbsolutePath !PathSegments |
-  RelativePath !PathSegments
 
 newtype PathSegments =
   PathSegments (Vector PathSegment)
@@ -99,17 +92,6 @@ data HttpIri =
 newtype Security =
   Security Bool
 
--- ** Web form special case
--------------------------
-
-{-|
-A representation of the parsed query according to the web form standard.
-
-See <https://en.wikipedia.org/wiki/Query_string#Web_forms>.
--}
-newtype WebFormQuery =
-  WebFormQuery (Vector (Text, Vector Text))
-
 
 -- * Functions
 -------------------------
@@ -145,10 +127,6 @@ iriFromHttpIri (HttpIri (Security secure) host port pathSegments query fragment)
 deriving instance Show Iri
 deriving instance Eq Iri
 B.deriveLift ''Iri
-
-deriving instance Show RelativeIri
-deriving instance Eq RelativeIri
-B.deriveLift ''RelativeIri
 
 deriving instance Show Scheme
 deriving instance Eq Scheme
@@ -190,10 +168,6 @@ deriving instance Show Port
 deriving instance Eq Port
 B.deriveLift ''Port
 
-deriving instance Show Path
-deriving instance Eq Path
-B.deriveLift ''Path
-
 deriving instance Show PathSegments
 deriving instance Eq PathSegments
 B.deriveLift ''PathSegments
@@ -217,8 +191,3 @@ B.deriveLift ''HttpIri
 deriving instance Show Security
 deriving instance Eq Security
 B.deriveLift ''Security
-
-deriving instance Show WebFormQuery
-deriving instance Eq WebFormQuery
-B.deriveLift ''WebFormQuery
-

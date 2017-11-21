@@ -215,12 +215,6 @@ port :: Parser Word16
 port =
   F.decimal
 
-{-# INLINE path #-}
-path :: Parser Path
-path =
-  (forwardSlash *> (AbsolutePath <$> pathSegments)) <|>
-  (RelativePath <$> pathSegments)
-
 {-# INLINE pathSegments #-}
 pathSegments :: Parser PathSegments
 pathSegments =
