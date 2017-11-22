@@ -11,6 +11,8 @@ import Iri.Prelude
 import Iri.Data
 import qualified Iri.Rendering.ByteString as A
 import qualified Iri.Parsing.ByteString as B
+import qualified Iri.Rendering.Text as C
+import qualified Iri.Parsing.Text as D
 
 
 -- * Prisms
@@ -27,6 +29,14 @@ uriByteStringIriPrism =
 uriByteStringHttpIriPrism :: Prism' ByteString HttpIri
 uriByteStringHttpIriPrism =
   uriByteStringIriPrism . iriHttpIriPrism
+
+iriTextIriPrism :: Prism' Text Iri
+iriTextIriPrism =
+  prism C.iri (\ text -> either (const (Left text)) Right (D.iri text))
+
+iriTextHttpIriPrism :: Prism' Text HttpIri
+iriTextHttpIriPrism =
+  iriTextIriPrism . iriHttpIriPrism
 
 
 -- * Lenses
