@@ -21,9 +21,9 @@ newtype Scheme =
   Scheme ByteString
 
 data Hierarchy =
-  AuthorisedHierarchy !Authority !PathSegments |
-  AbsoluteHierarchy !PathSegments |
-  RelativeHierarchy !PathSegments
+  AuthorisedHierarchy !Authority !Path |
+  AbsoluteHierarchy !Path |
+  RelativeHierarchy !Path
 
 data Authority =
   Authority !UserInfo !Host !Port
@@ -54,8 +54,8 @@ data Port =
   PresentPort !Word16 |
   MissingPort
 
-newtype PathSegments =
-  PathSegments (Vector PathSegment)
+newtype Path =
+  Path (Vector PathSegment)
 
 newtype PathSegment =
   PathSegment Text
@@ -93,7 +93,7 @@ Compared to the general IRI definition it:
 * requires the Path component to be absolute
 -}
 data HttpIri =
-  HttpIri !Security !Host !Port !PathSegments !Query !Fragment
+  HttpIri !Security !Host !Port !Path !Query !Fragment
 
 newtype Security =
   Security Bool
@@ -111,17 +111,17 @@ httpIriFromIri (Iri (Scheme scheme) hierarchy query fragment) =
       "https" -> Right (Security True)
       _ -> Left ("Not an HTTP scheme: " <> (fromString . show) scheme)
     case hierarchy of
-      AuthorisedHierarchy (Authority userInfo host port) pathSegments -> case userInfo of
-        MissingUserInfo -> Right (HttpIri security host port pathSegments query fragment)
+      AuthorisedHierarchy (Authority userInfo host port) path -> case userInfo of
+        MissingUserInfo -> Right (HttpIri security host port path query fragment)
         PresentUserInfo (User user) _ -> Left ("User Info is present")
       _ -> Left ("Not an authorised hierarchy")
 
 {-| Generalize an HTTP IRI to IRI -}
 iriFromHttpIri :: HttpIri -> Iri
-iriFromHttpIri (HttpIri (Security secure) host port pathSegments query fragment) =
+iriFromHttpIri (HttpIri (Security secure) host port path query fragment) =
   Iri scheme hierarchy query fragment
   where
     scheme =
       Scheme (if secure then "https" else "http")
     hierarchy =
-      AuthorisedHierarchy (Authority MissingUserInfo host port) pathSegments
+      AuthorisedHierarchy (Authority MissingUserInfo host port) path

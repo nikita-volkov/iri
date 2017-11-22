@@ -27,7 +27,7 @@ deriving instance Eq DomainLabel
 
 deriving instance Eq Port
 
-deriving instance Eq PathSegments
+deriving instance Eq Path
 
 deriving instance Eq PathSegment
 

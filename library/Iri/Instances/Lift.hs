@@ -28,7 +28,7 @@ deriveLift ''DomainLabel
 
 deriveLift ''Port
 
-deriveLift ''PathSegments
+deriveLift ''Path
 
 deriveLift ''PathSegment
 

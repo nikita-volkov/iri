@@ -35,11 +35,11 @@ iri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
     (fragment fragmentValue))
 
 httpIri :: HttpIri -> Builder
-httpIri (HttpIri (Security secure) hostValue portValue pathSegmentsValue queryValue fragmentValue) =
+httpIri (HttpIri (Security secure) hostValue portValue pathValue queryValue fragmentValue) =
   (if secure then string "https://" else string "http://") <>
   host hostValue <>
   prependIfNotNull (char ':') (port portValue) <>
-  prependIfNotNull (char '/') (pathSegments pathSegmentsValue) <>
+  prependIfNotNull (char '/') (path pathValue) <>
   prependIfNotNull (char '?') (query queryValue) <>
   prependIfNotNull (char '#') (fragment fragmentValue)
 
@@ -50,12 +50,12 @@ scheme (Scheme bytes) =
 hierarchy :: Hierarchy -> Builder
 hierarchy =
   \ case
-    AuthorisedHierarchy authorityValue pathSegmentsValue ->
-      string "//" <> authority authorityValue <> prependIfNotNull (char '/') (pathSegments pathSegmentsValue)
-    AbsoluteHierarchy pathSegmentsValue ->
-      char '/' <> pathSegments pathSegmentsValue
-    RelativeHierarchy pathSegmentsValue ->
-      pathSegments pathSegmentsValue
+    AuthorisedHierarchy authorityValue pathValue ->
+      string "//" <> authority authorityValue <> prependIfNotNull (char '/') (path pathValue)
+    AbsoluteHierarchy pathValue ->
+      char '/' <> path pathValue
+    RelativeHierarchy pathValue ->
+      path pathValue
 
 authority :: Authority -> Builder
 authority (Authority userInfoValue hostValue portValue) =
@@ -104,8 +104,8 @@ port =
     PresentPort value -> unsignedDecimal value
     MissingPort -> mempty
 
-pathSegments :: PathSegments -> Builder
-pathSegments (PathSegments pathSegmentVector) =
+path :: Path -> Builder
+path (Path pathSegmentVector) =
   F.intercalate pathSegment (char '/') pathSegmentVector
 
 pathSegment :: PathSegment -> Builder

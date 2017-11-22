@@ -4,7 +4,7 @@ module Iri.Rendering.Ptr.Poking
   httpUri,
   scheme,
   host,
-  pathSegments,
+  path,
   query,
 )
 where
@@ -40,11 +40,11 @@ uri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
     (fragment fragmentValue))
 
 httpUri :: HttpIri -> Poking
-httpUri (HttpIri (Security secure) hostValue portValue pathSegmentsValue queryValue fragmentValue) =
+httpUri (HttpIri (Security secure) hostValue portValue pathValue queryValue fragmentValue) =
   (if secure then bytes "https://" else bytes "http://") <>
   host hostValue <>
   prependIfNotNull (asciiChar ':') (port portValue) <>
-  prependIfNotNull (asciiChar '/') (pathSegments pathSegmentsValue) <>
+  prependIfNotNull (asciiChar '/') (path pathValue) <>
   prependIfNotNull (asciiChar '?') (query queryValue) <>
   prependIfNotNull (asciiChar '#') (fragment fragmentValue)
 
@@ -55,12 +55,12 @@ scheme (Scheme value) =
 hierarchy :: Hierarchy -> Poking
 hierarchy =
   \ case
-    AuthorisedHierarchy authorityValue pathSegmentsValue ->
-      bytes "//" <> authority authorityValue <> prependIfNotNull (asciiChar '/') (pathSegments pathSegmentsValue)
-    AbsoluteHierarchy pathSegmentsValue ->
-      asciiChar '/' <> pathSegments pathSegmentsValue
-    RelativeHierarchy pathSegmentsValue ->
-      pathSegments pathSegmentsValue
+    AuthorisedHierarchy authorityValue pathValue ->
+      bytes "//" <> authority authorityValue <> prependIfNotNull (asciiChar '/') (path pathValue)
+    AbsoluteHierarchy pathValue ->
+      asciiChar '/' <> path pathValue
+    RelativeHierarchy pathValue ->
+      path pathValue
 
 authority :: Authority -> Poking
 authority (Authority userInfoValue hostValue portValue) =
@@ -111,8 +111,8 @@ port =
     PresentPort value -> asciiIntegral value
     MissingPort -> mempty
 
-pathSegments :: PathSegments -> Poking
-pathSegments (PathSegments pathSegmentVector) =
+path :: Path -> Poking
+path (Path pathSegmentVector) =
   F.intercalate pathSegment (asciiChar '/') pathSegmentVector
 
 pathSegment :: PathSegment -> Poking

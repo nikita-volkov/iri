@@ -109,10 +109,10 @@ httpUri =
     string "://"
     parsedHost <- host
     parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
-    parsedPathSegments <- (forwardSlash *> pathSegments) <|> pure (PathSegments mempty)
+    parsedPath <- (forwardSlash *> path) <|> pure (Path mempty)
     parsedQuery <- query
     parsedFragment <- fragment
-    return (HttpIri (Security secure) parsedHost parsedPort parsedPathSegments parsedQuery parsedFragment)
+    return (HttpIri (Security secure) parsedHost parsedPort parsedPath parsedQuery parsedFragment)
 
 {-# INLINE hierarchy #-}
 hierarchy :: Parser Hierarchy
@@ -124,18 +124,18 @@ hierarchy =
         slashPresent <- forwardSlash $> True <|> pure False
         if slashPresent
           then authorisedHierarchyBody AuthorisedHierarchy
-          else AbsoluteHierarchy <$> pathSegments
-      else RelativeHierarchy <$> pathSegments
+          else AbsoluteHierarchy <$> path
+      else RelativeHierarchy <$> path
 
 {-# INLINE authorisedHierarchyBody #-}
-authorisedHierarchyBody :: (Authority -> PathSegments -> body) -> Parser body
+authorisedHierarchyBody :: (Authority -> Path -> body) -> Parser body
 authorisedHierarchyBody body =
   do
     parsedUserInfo <- (presentUserInfo PresentUserInfo <* at) <|> pure MissingUserInfo
     parsedHost <- host
     parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
-    parsedPathSegments <- (forwardSlash *> pathSegments) <|> pure (PathSegments mempty)
-    return (body (Authority parsedUserInfo parsedHost parsedPort) parsedPathSegments)
+    parsedPath <- (forwardSlash *> path) <|> pure (Path mempty)
+    return (body (Authority parsedUserInfo parsedHost parsedPort) parsedPath)
 
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
@@ -215,14 +215,14 @@ port :: Parser Word16
 port =
   F.decimal
 
-{-# INLINE pathSegments #-}
-pathSegments :: Parser PathSegments
-pathSegments =
+{-# INLINE path #-}
+path :: Parser Path
+path =
   do
     segments <- E.sepBy pathSegment forwardSlash
     if segmentsAreEmpty segments
-      then return (PathSegments mempty)
-      else return (PathSegments segments)
+      then return (Path mempty)
+      else return (Path segments)
   where
     segmentsAreEmpty segments =
       S.length segments == 1 &&
