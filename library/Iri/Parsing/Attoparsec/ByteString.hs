@@ -148,11 +148,11 @@ presentUserInfo :: (User -> Password -> a) -> Parser a
 presentUserInfo result =
   labeled "User info" $
   do
-    user <- User <$> urlEncodedString (C.unencodedPathSegment . fromIntegral)
+    user <- User <$> urlEncodedString (C.unencodedUserInfoComponent . fromIntegral)
     passwordFollows <- True <$ colon <|> pure False
     if passwordFollows
       then do
-        password <- PresentPassword <$> urlEncodedString (C.unencodedPathSegment . fromIntegral)
+        password <- PresentPassword <$> urlEncodedString (C.unencodedUserInfoComponent . fromIntegral)
         return (result user password)
       else return (result user MissingPassword)
 
