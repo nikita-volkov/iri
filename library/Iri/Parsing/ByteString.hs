@@ -1,6 +1,7 @@
 module Iri.Parsing.ByteString
 (
   uri,
+  httpUri,
 )
 where
 
