@@ -10,7 +10,7 @@ import Iri.QuasiQuoter
 import qualified Iri.Data as A
 import qualified Iri.Parsing.ByteString as D
 import qualified Iri.Rendering.Text as C
-import qualified Iri.Rendering.ByteString.Ascii as E
+import qualified Iri.Rendering.ByteString as E
 
 
 main =

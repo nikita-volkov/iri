@@ -1,9 +1,9 @@
-module Iri.Rendering.ByteString.Ascii
+module Iri.Rendering.ByteString
 where
 
 import Iri.Prelude
 import Iri.Data
-import qualified Iri.Rendering.Ptr.Poking.Ascii as A
+import qualified Iri.Rendering.Ptr.Poking as A
 import qualified Ptr.ByteString as F
 
 

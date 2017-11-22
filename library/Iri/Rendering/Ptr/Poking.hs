@@ -1,4 +1,4 @@
-module Iri.Rendering.Ptr.Poking.Ascii
+module Iri.Rendering.Ptr.Poking
 (
   uri,
   httpUri,

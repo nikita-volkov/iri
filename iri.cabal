@@ -49,8 +49,8 @@ library
   exposed-modules:
     Iri.Rendering.Text
     Iri.Rendering.TextBuilder
-    Iri.Rendering.Ptr.Poking.Ascii
-    Iri.Rendering.ByteString.Ascii
+    Iri.Rendering.Ptr.Poking
+    Iri.Rendering.ByteString
     Iri.Parsing.ByteString
     Iri.Parsing.Attoparsec.ByteString
     Iri.QuasiQuoter
