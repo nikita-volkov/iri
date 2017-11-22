@@ -9,11 +9,28 @@ where
 
 import Iri.Prelude
 import Iri.Data
+import qualified Iri.Rendering.ByteString as A
+import qualified Iri.Parsing.ByteString as B
 
+
+-- * Prisms
+-------------------------
 
 iriHttpIriPrism :: Prism' Iri HttpIri
 iriHttpIriPrism =
   prism iriFromHttpIri (\ iri -> either (const (Left iri)) Right (httpIriFromIri iri))
+
+uriByteStringIriPrism :: Prism' ByteString Iri
+uriByteStringIriPrism =
+  prism A.uri (\ bytes -> either (const (Left bytes)) Right (B.uri bytes))
+
+uriByteStringHttpIriPrism :: Prism' ByteString HttpIri
+uriByteStringHttpIriPrism =
+  uriByteStringIriPrism . iriHttpIriPrism
+
+
+-- * Lenses
+-------------------------
 
 iriSchemeLens :: Lens' Iri ByteString
 iriSchemeLens =
