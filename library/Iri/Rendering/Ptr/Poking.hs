@@ -2,6 +2,10 @@ module Iri.Rendering.Ptr.Poking
 (
   uri,
   httpUri,
+  scheme,
+  host,
+  pathSegments,
+  query,
 )
 where
 
