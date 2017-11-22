@@ -9,6 +9,7 @@ import Test.Tasty.QuickCheck
 import Iri.QuasiQuoter
 import qualified Iri.Data as A
 import qualified Iri.Parsing.ByteString as D
+import qualified Iri.Parsing.Text as F
 import qualified Iri.Rendering.Text as C
 import qualified Iri.Rendering.ByteString as E
 
@@ -71,4 +72,9 @@ parsing =
   [
     testCase "User Info" $
     assertEqual "" (Right "http://user:password@localhost:993") (fmap E.uri (D.uri "http://user:password@localhost:993"))
+    ,
+    testCase "URI, IRI" $
+    assertEqual ""
+      (D.uri "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3")
+      (F.iri "https://ru.wikipedia.org/wiki/Баренцбург")
   ]

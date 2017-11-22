@@ -14,3 +14,34 @@ instance Show Iri where
 instance Show HttpIri where
   show =
     B.unpack . A.httpIri
+
+deriving instance Show Scheme
+
+deriving instance Show Hierarchy
+
+deriving instance Show Authority
+
+deriving instance Show UserInfo
+
+deriving instance Show User
+
+deriving instance Show Password
+
+deriving instance Show Host
+
+deriving instance Show RegName
+
+deriving instance Show DomainLabel
+
+deriving instance Show Port
+
+deriving instance Show Path
+
+deriving instance Show PathSegment
+
+deriving instance Show Query
+
+deriving instance Show Fragment
+
+deriving instance Show Security
+

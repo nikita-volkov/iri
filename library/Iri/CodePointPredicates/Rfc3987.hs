@@ -121,9 +121,20 @@ import Iri.CodePointPredicates.Core
 import qualified Iri.CodePointPredicates.Rfc3986 as A
 
 
+scheme :: Predicate
+scheme =
+  A.scheme
+
 unencodedUserInfoComponent :: Predicate
 unencodedUserInfoComponent =
   unreserved ||| A.subDelims
+
+{-
+ireg-name      = *( iunreserved / pct-encoded / sub-delims )
+-}
+unencodedRegName :: Predicate
+unencodedRegName =
+  (unreserved ||| A.subDelims) &&& ((/=) 46)
 
 {-
 ipchar         = iunreserved / pct-encoded / sub-delims / ":"

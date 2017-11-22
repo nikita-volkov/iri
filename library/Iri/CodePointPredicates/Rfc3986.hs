@@ -114,7 +114,7 @@ scheme =
 domainLabel :: Predicate
 domainLabel =
   cached $
-  asciiAlphanumeric ||| oneOfChars "-_"
+  asciiAlphanumeric ||| oneOfChars "-_~"
 
 {-
 pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"

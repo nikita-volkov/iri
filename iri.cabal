@@ -53,6 +53,8 @@ library
     Iri.Rendering.ByteString
     Iri.Parsing.ByteString
     Iri.Parsing.Attoparsec.ByteString
+    Iri.Parsing.Attoparsec.Text
+    Iri.Parsing.Text
     Iri.QuasiQuoter
     Iri.Data
     Iri.Lenses
@@ -82,7 +84,7 @@ library
     punycode >=2 && <3,
     ip >=1.1 && <2,
     text ==1.*,
-    text-builder >=0.5 && <0.6,
+    text-builder >=0.5.1 && <0.6,
     bytestring >=0.10 && <0.11,
     vector >=0.10 && <0.13,
     vector-builder >=0.3.4 && <0.4,
