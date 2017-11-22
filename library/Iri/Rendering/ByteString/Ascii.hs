@@ -11,3 +11,8 @@ import qualified Ptr.ByteString as F
 uri :: Iri -> ByteString
 uri =
   F.poking . A.uri
+
+{-| Render as URI ASCII bytes -}
+httpUri :: HttpIri -> ByteString
+httpUri =
+  F.poking . A.httpUri

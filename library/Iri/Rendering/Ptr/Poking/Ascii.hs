@@ -1,6 +1,7 @@
 module Iri.Rendering.Ptr.Poking.Ascii
 (
   uri,
+  httpUri,
 )
 where
 
@@ -33,6 +34,15 @@ uri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
   (prependIfNotNull
     (asciiChar '#')
     (fragment fragmentValue))
+
+httpUri :: HttpIri -> Poking
+httpUri (HttpIri (Security secure) hostValue portValue pathSegmentsValue queryValue fragmentValue) =
+  (if secure then bytes "https://" else bytes "http://") <>
+  host hostValue <>
+  prependIfNotNull (asciiChar ':') (port portValue) <>
+  prependIfNotNull (asciiChar '/') (pathSegments pathSegmentsValue) <>
+  prependIfNotNull (asciiChar '?') (query queryValue) <>
+  prependIfNotNull (asciiChar '#') (fragment fragmentValue)
 
 scheme :: Scheme -> Poking
 scheme (Scheme value) =
