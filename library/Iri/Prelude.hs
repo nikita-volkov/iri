@@ -1,12 +1,6 @@
 module Iri.Prelude
 (
   module Exports,
-  Prism,
-  Prism',
-  Lens,
-  Lens',
-  prism,
-  lens,
 )
 where
 
@@ -68,25 +62,3 @@ import Bug as Exports
 import qualified Language.Haskell.TH.Lift as A
 A.deriveLift ''IPv4
 A.deriveLift ''IPv6
-
---------------------------------------------------------------------------------
-
-type Simple f s a = f s s a a
-
-type Lens s t a b = forall f. Functor f => (a -> f b) -> s -> f t
-
-type Lens' s a = Lens s s a a
-
-type Prism s t a b = forall p f. (Choice p, Applicative f) => p a (f b) -> p s (f t)
-
-type Prism' s a = Prism s s a a
-
-{-# INLINE prism #-}
-prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-prism bt seta =
-  dimap seta (either pure (fmap bt)) . right'
-
-{-# INLINE lens #-}
-lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens sa sbt afb s =
-  sbt s <$> afb (sa s)

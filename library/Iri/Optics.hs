@@ -4,7 +4,25 @@ It is compatible with the general Van Laarhoven lens libraries, such as \"lens\"
 
 Many more definitions can be implemented, so do PRs if you miss any!
 -}
-module Iri.Lenses
+module Iri.Optics
+(
+  -- * Definitions
+  Lens,
+  Lens',
+  Prism,
+  Prism',
+  -- * Prisms
+  iriHttpIriPrism,
+  uriByteStringIriPrism,
+  uriByteStringHttpIriPrism,
+  iriTextIriPrism,
+  iriTextHttpIriPrism,
+  -- * Lenses
+  iriSchemeLens,
+  iriHierarchyLens,
+  iriQueryLens,
+  iriFragmentLens,
+)
 where
 
 import Iri.Prelude
@@ -14,6 +32,24 @@ import qualified Iri.Parsing.ByteString as B
 import qualified Iri.Rendering.Text as C
 import qualified Iri.Parsing.Text as D
 
+
+type Lens s t a b = forall f. Functor f => (a -> f b) -> s -> f t
+
+type Lens' s a = Lens s s a a
+
+type Prism s t a b = forall p f. (Choice p, Applicative f) => p a (f b) -> p s (f t)
+
+type Prism' s a = Prism s s a a
+
+{-# INLINE prism #-}
+prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
+prism bt seta =
+  dimap seta (either pure (fmap bt)) . right'
+
+{-# INLINE lens #-}
+lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
+lens sa sbt afb s =
+  sbt s <$> afb (sa s)
 
 -- * Prisms
 -------------------------

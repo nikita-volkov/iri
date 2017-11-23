@@ -57,7 +57,7 @@ library
     Iri.Parsing.Text
     Iri.QuasiQuoter
     Iri.Data
-    Iri.Lenses
+    Iri.Optics
   other-modules:
     Iri.Rendering.Text.Internal
     Iri.Rendering.TextBuilder.Internal
