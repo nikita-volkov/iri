@@ -27,13 +27,13 @@ labeled label parser =
   parser <?> label
 
 {-|
-Parser of a well-formed URI conforming to the RFC3986 standard into IRI.
-Performs URL- and Punycode-decoding.
+Parser of a well-formed IRI conforming to the RFC3987 standard into IRI.
+Performs URL-decoding.
 -}
 {-# INLINABLE iri #-}
 iri :: Parser Iri
 iri =
-  labeled "URI" $ do
+  labeled "IRI" $ do
     parsedScheme <- scheme
     char ':'
     parsedHierarchy <- hierarchy
@@ -42,12 +42,12 @@ iri =
     return (Iri parsedScheme parsedHierarchy parsedQuery parsedFragment)
 
 {-|
-Same as 'iri', but optimized specifially for the case of HTTP URIs.
+Same as 'iri', but optimized specifially for the case of HTTP IRIs.
 -}
 {-# INLINABLE httpIri #-}
 httpIri :: Parser HttpIri
 httpIri =
-  labeled "HTTP URI" $ do
+  labeled "HTTP IRI" $ do
     asciiCI "http"
     secure <- satisfy (\ x -> x == 's' || x == 'S') $> True <|> pure False
     string "://"
