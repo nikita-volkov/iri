@@ -5,4 +5,4 @@ module Iri.Rendering.TextBuilder
 where
 
 import Iri.Rendering.TextBuilder.Internal
-import Iri.Data.Internal
+import Iri.Data.Types

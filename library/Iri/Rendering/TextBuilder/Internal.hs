@@ -6,7 +6,7 @@ module Iri.Rendering.TextBuilder.Internal
 where
 
 import Iri.Prelude hiding (null)
-import Iri.Data.Internal
+import Iri.Data.Types
 import Text.Builder
 import qualified Data.Text.Encoding as A
 import qualified Data.Text.Encoding.Error as A

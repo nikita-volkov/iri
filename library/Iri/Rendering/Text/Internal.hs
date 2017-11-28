@@ -2,7 +2,7 @@ module Iri.Rendering.Text.Internal
 where
 
 import Iri.Prelude
-import Iri.Data.Internal
+import Iri.Data.Types
 import qualified Iri.Rendering.TextBuilder.Internal as A
 import qualified Text.Builder as B
 

@@ -2,7 +2,7 @@ module Iri.Data.Instances.Show
 where
 
 import Iri.Prelude
-import Iri.Data.Internal
+import Iri.Data.Types
 import qualified Iri.Rendering.Text.Internal as A
 import qualified Data.Text as B
 

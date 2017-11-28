@@ -61,7 +61,8 @@ library
   other-modules:
     Iri.Rendering.Text.Internal
     Iri.Rendering.TextBuilder.Internal
-    Iri.Data.Internal
+    Iri.Data.Types
+    Iri.Data.Functions
     Iri.Data.Instances.Lift
     Iri.Data.Instances.Show
     Iri.Data.Instances.Eq

@@ -2,7 +2,7 @@ module Iri.Data.Instances.Eq
 where
 
 import Iri.Prelude
-import Iri.Data.Internal
+import Iri.Data.Types
 
 
 deriving instance Eq Iri

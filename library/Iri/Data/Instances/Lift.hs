@@ -2,7 +2,7 @@ module Iri.Data.Instances.Lift
 where
 
 import Iri.Prelude
-import Iri.Data.Internal
+import Iri.Data.Types
 import Language.Haskell.TH.Lift
 
 
