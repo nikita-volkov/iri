@@ -1,4 +1,4 @@
-module Iri.Instances.Eq
+module Iri.Data.Instances.Eq
 where
 
 import Iri.Prelude

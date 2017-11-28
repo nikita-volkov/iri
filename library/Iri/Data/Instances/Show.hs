@@ -1,4 +1,4 @@
-module Iri.Instances.Show
+module Iri.Data.Instances.Show
 where
 
 import Iri.Prelude

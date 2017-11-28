@@ -1,4 +1,4 @@
-module Iri.Instances.Lift
+module Iri.Data.Instances.Lift
 where
 
 import Iri.Prelude

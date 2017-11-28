@@ -11,7 +11,7 @@ module Iri.Data
 where
 
 import Iri.Data.Internal
-import Iri.Instances.Lift
-import Iri.Instances.Eq
-import Iri.Instances.Show
+import Iri.Data.Instances.Lift
+import Iri.Data.Instances.Eq
+import Iri.Data.Instances.Show
 
