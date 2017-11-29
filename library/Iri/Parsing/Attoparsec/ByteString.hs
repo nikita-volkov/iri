@@ -280,16 +280,6 @@ query =
   labeled "Query" $
   (question *> (Query <$> queryOrFragmentBody)) <|> pure (Query mempty)
 
-{-# INLINABLE queryPair #-}
-queryPair :: (Text -> Text -> a) -> Parser a
-queryPair result =
-  do
-    !key <- urlEncodedString (C.unencodedQueryComponent . fromIntegral)
-    when (T.null key) (fail "Key is empty")
-    optional (string "[]")
-    !value <- (equality *> urlEncodedString (C.unencodedQueryComponent . fromIntegral)) <|> pure ""
-    return (result key value)
-
 {-# INLINABLE fragment #-}
 fragment :: Parser Fragment
 fragment =
