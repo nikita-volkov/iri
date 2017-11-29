@@ -233,11 +233,11 @@ pathSegment :: Parser PathSegment
 pathSegment =
   fmap PathSegment (urlEncodedString (C.unencodedPathSegment . fromIntegral))
 
-{-# INLINABLE urlEncodedString #-}
-urlEncodedString :: (Word8 -> Bool) -> Parser Text
-urlEncodedString unencodedBytesPredicate =
-  labeled "URL-encoded string" $
-  R.foldlM progress (mempty, mempty, B.streamDecodeUtf8) partPoking >>= finish
+{-# INLINABLE utf8Chunks #-}
+utf8Chunks :: Parser ByteString -> Parser Text
+utf8Chunks chunk =
+  labeled "UTF8 chunks" $
+  R.foldlM progress (mempty, mempty, B.streamDecodeUtf8) chunk >>= finish
   where
     progress (!builder, _, decode) bytes =
       case unsafeDupablePerformIO (try (evaluate (decode bytes))) of
@@ -249,11 +249,16 @@ urlEncodedString unencodedBytesPredicate =
       if K.null undecodedBytes
         then return (J.run builder)
         else fail (showString "UTF8 decoding: Bytes remaining: " (show undecodedBytes))
-    partPoking =
-      takeWhile1 unencodedBytesPredicate <|> encoded
-      where
-        encoded =
-          K.singleton <$> percentEncodedByte
+
+{-# INLINABLE urlEncodedString #-}
+urlEncodedString :: (Word8 -> Bool) -> Parser Text
+urlEncodedString unencodedBytesPredicate =
+  labeled "URL-encoded string" $
+  utf8Chunks $
+  takeWhile1 unencodedBytesPredicate <|> encoded
+  where
+    encoded =
+      K.singleton <$> percentEncodedByte
 
 {-# INLINE percentEncodedByte #-}
 percentEncodedByte :: Parser Word8
