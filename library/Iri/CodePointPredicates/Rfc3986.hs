@@ -99,12 +99,10 @@ Reference:
 @
 unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
 @
-
-Notice that we've added the "|" char, because some real life URIs seem to contain it.
 -}
 unreserved :: Predicate
 unreserved =
-  asciiAlphanumeric ||| oneOfChars "-._~|"
+  asciiAlphanumeric ||| oneOfChars "-._~"
 
 subDelims :: Predicate
 subDelims =
@@ -131,14 +129,21 @@ unencodedPathSegment =
   cached $
   unreserved ||| subDelims ||| oneOfChars ":@"
 
-{-
+{-|
+Reference:
+
+@
 query         = *( pchar / "/" / "?" )
+@
+
+Notice that we've added the "|" char, because some real life URIs seem to contain it.
+Also we've excluded the '+' char, because it gets decoded as a space char.
 -}
 {-# NOINLINE unencodedQuery #-}
 unencodedQuery :: Predicate
 unencodedQuery =
   cached $
-  (unencodedPathSegment ||| oneOfChars "/?") &&& (/= 43)
+  (unencodedPathSegment ||| oneOfChars "/?|") &&& (/= 43)
 
 unencodedFragment :: Predicate
 unencodedFragment =

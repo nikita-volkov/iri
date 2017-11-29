@@ -144,16 +144,27 @@ unencodedPathSegment :: Predicate
 unencodedPathSegment =
   unreserved ||| A.subDelims ||| oneOfChars ":@"
 
-{-
+{-|
+Reference:
+
+@
 iquery         = *( ipchar / iprivate / "/" / "?" )
+@
+
+Notice that we've added the "|" char, because some real life URIs seem to contain it.
+Also we've excluded the '+' char, because it gets decoded as a space char.
 -}
 unencodedQuery :: Predicate
 unencodedQuery =
-  (unencodedPathSegment ||| private ||| oneOfChars "/?") &&& (/= 43)
+  (unencodedPathSegment ||| private ||| oneOfChars "/?|") &&& (/= 43)
 
+{-|
+Notice that we've added the "|" char, because some real life URIs seem to contain it.
+Also we've excluded the '+' char, because it gets decoded as a space char.
+-}
 unencodedFragment :: Predicate
 unencodedFragment =
-  unencodedPathSegment ||| oneOfChars "/?"
+  (unencodedPathSegment ||| oneOfChars "/?|") &&& (/= 43)
 
 {-
 iunreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~" / ucschar
