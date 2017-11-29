@@ -149,7 +149,7 @@ iquery         = *( ipchar / iprivate / "/" / "?" )
 -}
 unencodedQuery :: Predicate
 unencodedQuery =
-  unencodedPathSegment ||| private ||| oneOfChars "/?"
+  (unencodedPathSegment ||| private ||| oneOfChars "/?") &&& (/= 43)
 
 unencodedFragment :: Predicate
 unencodedFragment =

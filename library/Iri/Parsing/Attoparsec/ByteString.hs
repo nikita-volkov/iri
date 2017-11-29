@@ -34,6 +34,11 @@ percent :: Parser Word8
 percent =
   word8 37
 
+{-# INLINE plus #-}
+plus :: Parser Word8
+plus =
+  word8 43
+
 {-# INLINE colon #-}
 colon :: Parser Word8
 colon =
@@ -263,7 +268,7 @@ urlEncodedString unencodedBytesPredicate =
 {-# INLINE percentEncodedByte #-}
 percentEncodedByte :: Parser Word8
 percentEncodedByte =
-  do
+  labeled "Percent-encoded byte" $ do
     percent 
     byte1 <- anyWord8
     byte2 <- anyWord8
@@ -273,15 +278,7 @@ percentEncodedByte =
 query :: Parser Query
 query =
   labeled "Query" $
-  (question *> queryBody) <|> pure (Query mempty)
-
-{-|
-The stuff after the question mark.
--}
-{-# INLINABLE queryBody #-}
-queryBody :: Parser Query
-queryBody =
-  fmap Query (urlEncodedString (C.unencodedQuery . fromIntegral))
+  (question *> (Query <$> queryOrFragmentBody)) <|> pure (Query mempty)
 
 {-# INLINABLE queryPair #-}
 queryPair :: (Text -> Text -> a) -> Parser a
@@ -297,5 +294,15 @@ queryPair result =
 fragment :: Parser Fragment
 fragment =
   labeled "Fragment" $
-  (hash *> (Fragment <$> urlEncodedString (C.unencodedFragment . fromIntegral))) <|>
-  pure (Fragment mempty)
+  (hash *> (Fragment <$> queryOrFragmentBody)) <|> pure (Fragment mempty)
+
+{-|
+The stuff after the question or the hash mark.
+-}
+{-# INLINABLE queryOrFragmentBody #-}
+queryOrFragmentBody :: Parser Text
+queryOrFragmentBody =
+  utf8Chunks $
+  takeWhile1 (C.unencodedQuery . fromIntegral) <|>
+  " " <$ plus <|>
+  K.singleton <$> percentEncodedByte
