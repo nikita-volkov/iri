@@ -163,7 +163,6 @@ urlEncodedSequence =
     progress (!builder, _ :: ByteString, decode) byte =
       case unsafeDupablePerformIO (try (evaluate (decode (K.singleton byte)))) of
         Right (B.Some decodedChunk undecodedBytes newDecode) ->
-          trace (show decodedChunk <> " " <> show undecodedBytes) $
           return (builder <> J.text decodedChunk, undecodedBytes, newDecode)
         Left (L.DecodeError error _) ->
           fail (showString "UTF8 decoding: " error)

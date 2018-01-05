@@ -22,8 +22,9 @@ foldlM step start elementParser =
   loop start
   where
     loop state =
-      mplus
-        (do
-          element <- elementParser
-          loop =<< step state element)
-        (return state)
+      join
+        (mplus
+          (do
+            element <- elementParser
+            return (step state element >>= loop))
+          (return (return state)))

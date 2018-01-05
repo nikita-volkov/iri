@@ -93,8 +93,12 @@ import Iri.Prelude hiding ((|||), (&&&), inRange, Predicate)
 import Iri.CodePointPredicates.Core
 import qualified Data.Vector as A
 
-{-
+{-|
+Reference:
+
+@
 unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+@
 -}
 unreserved :: Predicate
 unreserved =
@@ -125,24 +129,31 @@ unencodedPathSegment =
   cached $
   unreserved ||| subDelims ||| oneOfChars ":@"
 
-{-
+{-|
+Reference:
+
+@
 query         = *( pchar / "/" / "?" )
+@
+
+Notice that we've added the "|" char, because some real life URIs seem to contain it.
+Also we've excluded the '+' char, because it gets decoded as a space char.
 -}
 {-# NOINLINE unencodedQuery #-}
 unencodedQuery :: Predicate
 unencodedQuery =
   cached $
-  unencodedPathSegment ||| oneOfChars "/?"
+  (unencodedPathSegment ||| oneOfChars "/?|") &&& (/= 43)
+
+unencodedFragment :: Predicate
+unencodedFragment =
+  unencodedQuery
 
 {-# NOINLINE unencodedQueryComponent #-}
 unencodedQueryComponent :: Predicate
 unencodedQueryComponent =
   cached $
   unencodedQuery &&& not . oneOfChars "=&;"
-
-unencodedFragment :: Predicate
-unencodedFragment =
-  unencodedQueryComponent
 
 {-# NOINLINE unencodedUserInfoComponent #-}
 unencodedUserInfoComponent :: Predicate
