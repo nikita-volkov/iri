@@ -12,16 +12,16 @@ module Iri.Optics
   Prism,
   Prism',
   -- * Prisms
-  iriHttpIriPrism,
-  uriByteStringIriPrism,
-  uriByteStringHttpIriPrism,
-  iriTextIriPrism,
-  iriTextHttpIriPrism,
+  iriHttpIri,
+  uriByteStringIri,
+  uriByteStringHttpIri,
+  iriTextIri,
+  iriTextHttpIri,
   -- * Lenses
-  iriSchemeLens,
-  iriHierarchyLens,
-  iriQueryLens,
-  iriFragmentLens,
+  iriScheme,
+  iriHierarchy,
+  iriQuery,
+  iriFragment,
 )
 where
 
@@ -54,50 +54,50 @@ lens sa sbt afb s =
 -- * Prisms
 -------------------------
 
-iriHttpIriPrism :: Prism' Iri HttpIri
-iriHttpIriPrism =
+iriHttpIri :: Prism' Iri HttpIri
+iriHttpIri =
   prism iriFromHttpIri (\ iri -> either (const (Left iri)) Right (httpIriFromIri iri))
 
-uriByteStringIriPrism :: Prism' ByteString Iri
-uriByteStringIriPrism =
+uriByteStringIri :: Prism' ByteString Iri
+uriByteStringIri =
   prism A.uri (\ bytes -> either (const (Left bytes)) Right (B.uri bytes))
 
-uriByteStringHttpIriPrism :: Prism' ByteString HttpIri
-uriByteStringHttpIriPrism =
-  uriByteStringIriPrism . iriHttpIriPrism
+uriByteStringHttpIri :: Prism' ByteString HttpIri
+uriByteStringHttpIri =
+  uriByteStringIri . iriHttpIri
 
-iriTextIriPrism :: Prism' Text Iri
-iriTextIriPrism =
+iriTextIri :: Prism' Text Iri
+iriTextIri =
   prism C.iri (\ text -> either (const (Left text)) Right (D.iri text))
 
-iriTextHttpIriPrism :: Prism' Text HttpIri
-iriTextHttpIriPrism =
-  iriTextIriPrism . iriHttpIriPrism
+iriTextHttpIri :: Prism' Text HttpIri
+iriTextHttpIri =
+  iriTextIri . iriHttpIri
 
 
 -- * Lenses
 -------------------------
 
-iriSchemeLens :: Lens' Iri ByteString
-iriSchemeLens =
+iriScheme :: Lens' Iri ByteString
+iriScheme =
   lens
     (\ (Iri (Scheme x) _ _ _) -> x)
     (\ (Iri _ hierarchy query fragment) x -> Iri (Scheme x) hierarchy query fragment)
 
-iriHierarchyLens :: Lens' Iri Hierarchy
-iriHierarchyLens =
+iriHierarchy :: Lens' Iri Hierarchy
+iriHierarchy =
   lens
     (\ (Iri _ x _ _) -> x)
     (\ (Iri scheme _ query fragment) x -> Iri scheme x query fragment)
 
-iriQueryLens :: Lens' Iri Text
-iriQueryLens =
+iriQuery :: Lens' Iri Text
+iriQuery =
   lens
     (\ (Iri _ _ (Query x) _) -> x)
     (\ (Iri scheme hierarchy _ fragment) x -> Iri scheme hierarchy (Query x) fragment)
 
-iriFragmentLens :: Lens' Iri Text
-iriFragmentLens =
+iriFragment :: Lens' Iri Text
+iriFragment =
   lens
     (\ (Iri _ _ _ (Fragment x)) -> x)
     (\ (Iri scheme hierarchy query _) x -> Iri scheme hierarchy query (Fragment x))
