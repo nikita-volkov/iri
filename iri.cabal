@@ -3,7 +3,7 @@ name:
 version:
   0.3
 category:
-  IRI, URI, URL, Data, Network
+  URI, URL, IRI, Network
 synopsis:
   RFC-based International Resource Identifier library
 description:
