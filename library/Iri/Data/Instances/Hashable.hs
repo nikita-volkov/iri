@@ -27,7 +27,7 @@ instance Hashable Host where
     case host of
       NamedHost regName -> hashWithSalt 0 regName
       IpV4Host ip -> hashWithSalt 1 ip
-      IpV6Host (B.IPv6 a b) -> hashWithSalt 2 (hashWithSalt (fromIntegral a) b)
+      IpV6Host (B.IPv6 a b) -> (hashWithSalt (hashWithSalt 2 a) b)
 
 instance Hashable RegName
 
