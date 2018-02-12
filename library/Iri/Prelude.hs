@@ -28,6 +28,14 @@ import Data.Profunctor.Strong as Exports
 -------------------------
 import Data.Semigroup as Exports
 
+-- hashable
+-------------------------
+import Data.Hashable as Exports
+
+-- vector-instances
+-------------------------
+import Data.Vector.Instances ()
+
 -- bytestring
 -------------------------
 import Data.ByteString as Exports (ByteString)

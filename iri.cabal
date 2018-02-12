@@ -66,6 +66,9 @@ library
     Iri.Data.Instances.Lift
     Iri.Data.Instances.Show
     Iri.Data.Instances.Eq
+    Iri.Data.Instances.Hashable
+    Iri.Data.Instances.Ord
+    Iri.Data.Instances.Generic
     Iri.Prelude
     Iri.Utf8CodePoint
     Iri.Vector
@@ -84,10 +87,12 @@ library
     attoparsec >=0.13 && <0.14,
     punycode >=2 && <3,
     ip >=1.1 && <2,
+    hashable >=1.2 && <2,
     text ==1.*,
     text-builder >=0.5.1 && <0.6,
     bytestring >=0.10 && <0.11,
     vector >=0.10 && <0.13,
+    vector-instances >=3.4 && <4,
     vector-builder >=0.3.4 && <0.4,
     profunctors >=5.2 && <6,
     contravariant >=1.4 && <2,
