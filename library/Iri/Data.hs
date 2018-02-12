@@ -16,4 +16,7 @@ import Iri.Data.Functions
 import Iri.Data.Instances.Lift
 import Iri.Data.Instances.Eq
 import Iri.Data.Instances.Show
+import Iri.Data.Instances.Ord
+import Iri.Data.Instances.Hashable
+import Iri.Data.Instances.Generic
 
