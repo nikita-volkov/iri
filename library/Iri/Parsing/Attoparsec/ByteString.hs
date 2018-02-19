@@ -2,6 +2,7 @@ module Iri.Parsing.Attoparsec.ByteString
 (
   uri,
   httpUri,
+  regName,
 )
 where
 
@@ -167,7 +168,7 @@ host =
   labeled "Host" $
   IpV6Host <$> ipV6 <|>
   IpV4Host <$> M.parserUtf8 <|>
-  NamedHost <$> domainName
+  NamedHost <$> regName
 
 {-# INLINABLE ipV6 #-}
 ipV6 :: Parser IPv6
@@ -195,9 +196,9 @@ ipV6 =
         colon
         return (N.fromWord16s a b c d 0 0 0 0))
 
-{-# INLINE domainName #-}
-domainName :: Parser RegName
-domainName =
+{-# INLINE regName #-}
+regName :: Parser RegName
+regName =
   fmap RegName (E.sepBy1 domainLabel (word8 46))
 
 {-|
