@@ -101,11 +101,11 @@ library
     base-prelude >=1 && <2,
     base >=4.7 && <5
 
-test-suite tests
+test-suite test
   type:
     exitcode-stdio-1.0
   hs-source-dirs:
-    tests
+    test
   main-is:
     Main.hs
   default-extensions:
