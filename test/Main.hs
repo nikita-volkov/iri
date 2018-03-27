@@ -70,6 +70,16 @@ main =
 parsing =
   testGroup "Parsing" $
   [
+    testCase "Messed up URIs" $
+    let
+      testUri uri =
+        assertEqual "Original and parsed URIs are not equal" (Right uri) (fmap E.uri (D.uri uri))
+      in traverse_ testUri
+        [
+          "http://m.ru.hellomagazine.com/krasota-i-zdorove/ukhod-za-kozhey-i-volosami/11373-5-prichesok-kotorye-sdelayut-vas-molozhe.html?utm_medium=teaser&utm_campaign=gnezdo1&utm_term=15376&utm_content=[TID",
+          "https://m.tsargrad.tv/news/komediju_113156?%90\"%20"
+        ]
+    ,
     testCase "User Info" $
     assertEqual "" (Right "http://user:password@localhost:993") (fmap E.uri (D.uri "http://user:password@localhost:993"))
     ,
