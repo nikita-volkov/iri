@@ -264,7 +264,8 @@ urlEncodedString unencodedBytesPredicate =
   takeWhile1 unencodedBytesPredicate <|> encoded
   where
     encoded =
-      K.singleton <$> percentEncodedByte
+        K.singleton <$> percentEncodedByte<|>
+        K.pack <$> failPercentEncodedByte
 
 {-# INLINE percentEncodedByte #-}
 percentEncodedByte :: Parser Word8
@@ -274,6 +275,14 @@ percentEncodedByte =
     byte1 <- anyWord8
     byte2 <- anyWord8
     I.matchPercentEncodedBytes (fail "Broken percent encoding") return byte1 byte2
+
+{-# INLINE failPercentEncodedByte #-}
+failPercentEncodedByte :: Parser [Word8]
+failPercentEncodedByte =
+      (\ x y z -> [x, y, z])
+  <$> percent
+  <*> anyWord8
+  <*> anyWord8
 
 {-# INLINABLE query #-}
 query :: Parser Query
@@ -294,6 +303,7 @@ The stuff after the question or the hash mark.
 queryOrFragmentBody :: Parser Text
 queryOrFragmentBody =
   utf8Chunks $
-  takeWhile1 (C.unencodedQuery . fromIntegral) <|>
-  " " <$ plus <|>
-  K.singleton <$> percentEncodedByte
+      takeWhile1 (C.unencodedQuery . fromIntegral)
+  <|> " " <$ plus
+  <|> K.singleton <$> percentEncodedByte
+  <|> K.pack <$> failPercentEncodedByte
