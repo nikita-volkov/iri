@@ -98,6 +98,6 @@ parsing =
       testCase "2" $
       assertEqual ""
         (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
-        (fmap show (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+        (fmap E.uri (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
     ]
   ]

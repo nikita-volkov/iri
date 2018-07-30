@@ -135,10 +135,14 @@ urlEncodedText unencodedPredicate =
 urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Poking
 urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
   K.unicodeCodePoint codePoint
-    (\ b1 -> if unencodedPredicate codePoint then word8 b1 else urlEncodedByte b1)
+    (\ b1 -> if unencodedPredicateWithPercent codePoint then word8 b1 else urlEncodedByte b1)
     (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
     (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
     (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
+    where
+      unencodedPredicateWithPercent =
+        I.cached $
+          unencodedPredicate I.||| (== 37)
 
 urlEncodedByte :: Word8 -> Poking
 urlEncodedByte =
