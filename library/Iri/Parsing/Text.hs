@@ -12,7 +12,7 @@ import qualified Data.Attoparsec.Text as B
 
 
 {-|
-Parser of a well-formed IRI conforming to the RFC3987 standard into IRI.
+Parser of a well-formed IRI conforming to the RFC3987 standard into 'Iri'.
 Performs URL-decoding.
 -}
 iri :: Text -> Either Text Iri

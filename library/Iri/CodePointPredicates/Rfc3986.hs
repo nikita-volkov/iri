@@ -91,7 +91,6 @@ where
 
 import Iri.Prelude hiding ((|||), (&&&), inRange, Predicate)
 import Iri.CodePointPredicates.Core
-import qualified Data.Vector as A
 
 {-|
 Reference:
@@ -143,7 +142,7 @@ Also we've excluded the '+' char, because it gets decoded as a space char.
 unencodedQuery :: Predicate
 unencodedQuery =
   cached $
-  (unencodedPathSegment ||| oneOfChars "/?|") &&& (/= 43)
+  (unencodedPathSegment ||| oneOfChars "/?|[]\"'") &&& (/= 43)
 
 unencodedFragment :: Predicate
 unencodedFragment =

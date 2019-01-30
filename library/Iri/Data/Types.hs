@@ -12,7 +12,7 @@ import Iri.Prelude
 
 
 {-|
-Thorough structure of IRI.
+Thorough structure of URI.
 -}
 data Iri =
   Iri !Scheme !Hierarchy !Query !Fragment
@@ -33,10 +33,10 @@ data UserInfo =
   MissingUserInfo
 
 newtype User =
-  User Text
+  User ByteString
 
 data Password =
-  PresentPassword !Text |
+  PresentPassword !ByteString |
   MissingPassword
 
 data Host =
@@ -47,8 +47,9 @@ data Host =
 newtype RegName =
   RegName (Vector DomainLabel)
 
-newtype DomainLabel =
-  DomainLabel Text
+data DomainLabel =
+  AsciiDomainLabel ByteString |
+  UnicodeDomainLabel Text
 
 data Port =
   PresentPort !Word16 |
@@ -58,20 +59,20 @@ newtype Path =
   Path (Vector PathSegment)
 
 newtype PathSegment =
-  PathSegment Text
+  PathSegment ByteString
 
 {-|
 Since the exact structure of the query string is not standardised and
 methods used to parse the query string may differ between websites,
-we simply represent it as a decoded Unicode string.
+we simply represent it as percent-decoded bytes.
 
 See <https://en.wikipedia.org/wiki/Query_string>.
 -}
 newtype Query =
-  Query Text
+  Query ByteString
 
 newtype Fragment =
-  Fragment Text
+  Fragment ByteString
 
 
 -- * Special cases
@@ -85,7 +86,7 @@ HTTP being by far the most common use-case for resource identifiers,
 it's been isolated into a dedicated data-type,
 which is optimised for that particular case.
 
-Compared to the general IRI definition it:
+Compared to the general URI definition it:
 
 * only supports the HTTP and HTTPS schemes
 * misses the Username and Password components
@@ -97,3 +98,21 @@ data HttpIri =
 
 newtype Security =
   Security Bool
+
+-- ** Parametric query representations
+-------------------------
+
+{-|
+Parsed representation of a query, which conforms to the parametric standard.
+Not all queries can be parsed like that.
+
+Keys and values are represented as percent-decoded bytes.
+-}
+newtype ParametricQuery =
+  ParametricQuery (HashMap ByteString (Vector ByteString))
+
+{-|
+Same as 'ParametricQuery' only with values represented by Unicode strings.
+-}
+newtype UnicodeParametricQuery =
+  UnicodeParametricQuery (HashMap Text (Vector Text))

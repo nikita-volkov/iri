@@ -19,6 +19,8 @@ import qualified Iri.MonadPlus as R
 import qualified Text.Builder as J
 import qualified Net.IPv4 as M
 import qualified Net.IPv6 as N
+import qualified Ptr.ByteString as ByteString
+import qualified Ptr.Poking as Poking
 
 
 {-# INLINE labeled #-}
@@ -27,7 +29,7 @@ labeled label parser =
   parser <?> label
 
 {-|
-Parser of a well-formed IRI conforming to the RFC3987 standard into IRI.
+Parser of a well-formed IRI conforming to the RFC3987 standard into 'Iri'.
 Performs URL-decoding.
 -}
 {-# INLINABLE iri #-}
@@ -120,7 +122,7 @@ Domain label with Punycode decoding applied.
 domainLabel :: Parser DomainLabel
 domainLabel =
   labeled "Domain label" $
-  DomainLabel <$> takeWhile1 (C.unencodedRegName . ord)
+  UnicodeDomainLabel <$> takeWhile1 (C.unencodedRegName . ord)
 
 {-# INLINE port #-}
 port :: Parser Word16
@@ -138,7 +140,7 @@ path =
   where
     segmentsAreEmpty segments =
       S.length segments == 1 &&
-      (case S.unsafeHead segments of PathSegment headSegmentText -> T.null headSegmentText)
+      (case S.unsafeHead segments of PathSegment headSegment -> K.null headSegment)
 
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
@@ -146,16 +148,24 @@ pathSegment =
   fmap PathSegment (urlEncodedComponent (C.unencodedPathSegment . ord))
 
 {-# INLINABLE urlEncodedComponent #-}
-urlEncodedComponent :: (Char -> Bool) -> Parser Text
+urlEncodedComponent :: (Char -> Bool) -> Parser ByteString
 urlEncodedComponent unencodedCharPredicate =
+  labeled "URL-encoded component" $
+  fmap ByteString.poking $
+  R.fold $
+  (Poking.bytes . B.encodeUtf8 <$> takeWhile1 unencodedCharPredicate) <|> (Poking.word8 <$> urlEncodedByte)
+
+{-# INLINABLE urlEncodedComponentText #-}
+urlEncodedComponentText :: (Char -> Bool) -> Parser Text
+urlEncodedComponentText unencodedCharPredicate =
   labeled "URL-encoded component" $
   fmap J.run $
   R.foldl mappend mempty $
-  (J.text <$> takeWhile1 unencodedCharPredicate) <|> urlEncodedSequence
+  (J.text <$> takeWhile1 unencodedCharPredicate) <|> urlEncodedSequenceTextBuilder
 
-{-# INLINABLE urlEncodedSequence #-}
-urlEncodedSequence :: Parser J.Builder
-urlEncodedSequence =
+{-# INLINABLE urlEncodedSequenceTextBuilder #-}
+urlEncodedSequenceTextBuilder :: Parser J.Builder
+urlEncodedSequenceTextBuilder =
   labeled "URL-encoded sequence" $ do
     start <- progress (mempty, mempty, B.streamDecodeUtf8) =<< urlEncodedByte
     R.foldlM progress (start) urlEncodedByte >>= finish

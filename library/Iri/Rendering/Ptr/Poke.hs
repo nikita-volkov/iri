@@ -1,4 +1,4 @@
-module Iri.Rendering.Poke
+module Iri.Rendering.Ptr.Poke
 where
 
 import Iri.Prelude

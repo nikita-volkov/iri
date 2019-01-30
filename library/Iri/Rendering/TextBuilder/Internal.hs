@@ -20,6 +20,7 @@ import qualified Iri.Vector as F
 import qualified Iri.CodePointPredicates.Core as I
 import qualified Iri.CodePointPredicates.Rfc3987 as I
 import qualified Iri.Utf8CodePoint as K
+import qualified Data.ByteString as ByteString
 
 
 iri :: Iri -> Builder
@@ -71,9 +72,9 @@ userInfo =
       MissingPassword -> userInfoComponent user
     MissingUserInfo -> mempty
 
-userInfoComponent :: Text -> Builder
+userInfoComponent :: ByteString -> Builder
 userInfoComponent =
-  urlEncodedText I.unencodedUserInfoComponent
+  urlEncodedBytesOrText I.unencodedUserInfoComponent
 
 host :: Host -> Builder
 host =
@@ -87,8 +88,10 @@ domainName (RegName vector) =
   F.intercalate domainLabel (char '.') vector
 
 domainLabel :: DomainLabel -> Builder
-domainLabel (DomainLabel value) =
-  text value
+domainLabel =
+  \ case
+    AsciiDomainLabel x -> asciiByteString x
+    UnicodeDomainLabel x -> text x
 
 ipV4 :: IPv4 -> Builder
 ipV4 =
@@ -110,15 +113,30 @@ path (Path pathSegmentVector) =
 
 pathSegment :: PathSegment -> Builder
 pathSegment (PathSegment value) =
-  urlEncodedText I.unencodedPathSegment value
+  urlEncodedBytesOrText I.unencodedPathSegment value
 
 query :: Query -> Builder
 query (Query value) =
-  urlEncodedText I.unencodedQuery value
+  urlEncodedBytesOrText I.unencodedQuery value
 
 fragment :: Fragment -> Builder
 fragment (Fragment value) =
-  urlEncodedText I.unencodedFragment value
+  urlEncodedBytesOrText I.unencodedFragment value
+
+urlEncodedBytesOrText :: I.Predicate -> ByteString -> Builder
+urlEncodedBytesOrText unencodedPredicate bytes =
+  case A.decodeUtf8' bytes of
+    Right text -> urlEncodedText unencodedPredicate text
+    Left _ -> urlEncodedBytes unencodedPredicate bytes
+
+{-| Apply URL-encoding to text -}
+urlEncodedBytes :: I.Predicate -> ByteString -> Builder
+urlEncodedBytes unencodedPredicate =
+  ByteString.foldl'
+    (\ builder -> mappend builder . \ byte -> if unencodedPredicate (fromIntegral byte)
+      then utf8CodeUnits1 byte
+      else urlEncodedByte byte)
+    mempty
 
 {-| Apply URL-encoding to text -}
 urlEncodedText :: I.Predicate -> Text -> Builder

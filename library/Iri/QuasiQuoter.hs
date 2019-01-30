@@ -2,6 +2,8 @@ module Iri.QuasiQuoter
 (
   uri,
   httpUri,
+  iri,
+  httpIri,
 )
 where
 
@@ -23,41 +25,41 @@ exp exp =
       fail "Not supported"
 
 {-|
-IRI literal parsed from textual URI.
+'Iri' literal from ASCII representation.
 -}
 uri :: QuasiQuoter
 uri =
   exp $ \ string ->
   case B.parseOnly (A.uri <* B.endOfInput) (fromString string) of
-    Right iri -> lift iri
+    Right uri -> lift uri
     Left error -> fail (showString "URI parsing: " error)
 
 {-|
-HTTP IRI literal parsed from textual URI.
+'HttpIri' literal from ASCII representation.
 -}
 httpUri :: QuasiQuoter
 httpUri =
   exp $ \ string ->
   case B.parseOnly (A.httpUri <* B.endOfInput) (fromString string) of
-    Right iri -> lift iri
+    Right uri -> lift uri
     Left error -> fail (showString "HTTP URI parsing: " error)
 
 {-|
-IRI literal parsed from textual IRI.
+'Iri' literal from IRI representation.
 -}
 iri :: QuasiQuoter
 iri =
   exp $ \ string ->
   case C.parseOnly (D.iri <* C.endOfInput) (fromString string) of
-    Right iri -> lift iri
+    Right uri -> lift uri
     Left error -> fail (showString "IRI parsing: " error)
 
 {-|
-HTTP IRI literal parsed from textual IRI.
+'HttpIri' literal from IRI representation.
 -}
 httpIri :: QuasiQuoter
 httpIri =
   exp $ \ string ->
   case C.parseOnly (D.httpIri <* C.endOfInput) (fromString string) of
-    Right iri -> lift iri
+    Right uri -> lift uri
     Left error -> fail (showString "HTTP IRI parsing: " error)
