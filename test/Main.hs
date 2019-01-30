@@ -107,13 +107,13 @@ main =
       [
         testCase "show" $
         assertEqual ""
-          (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
-          (fmap show (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+          (Right "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html")
+          (fmap show (D.uri "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html"))
         ,
         testCase "Text rendering" $
         assertEqual ""
-          (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
-          (fmap C.iri (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+          (Right "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html")
+          (fmap C.iri (D.uri "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html"))
       ]
     ]
   ]
