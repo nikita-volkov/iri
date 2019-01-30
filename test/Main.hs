@@ -83,10 +83,24 @@ parsing =
     testCase "User Info" $
     assertEqual "" (Right "http://user:password@localhost:993") (fmap E.uri (D.uri "http://user:password@localhost:993"))
     ,
-    testCase "URI, IRI" $
-    assertEqual ""
-      (D.uri "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3")
-      (F.iri "https://ru.wikipedia.org/wiki/Баренцбург")
+    testGroup "IRI parser vs. URI parser" $ let
+      testUriIri iri uri =
+        testCase (iri <> " vs. " <> uri) $
+        assertEqual "" (F.iri (fromString iri)) (D.uri (fromString uri))
+      in
+        [
+          testUriIri
+            "https://ru.wikipedia.org/wiki/Баренцбург"
+            "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3"
+          ,
+          testUriIri
+            "https://www.w3.org/International/articles/idn-and-iri/JP納豆/引き割り納豆.html"
+            "https://www.w3.org/International/articles/idn-and-iri/JP%E7%B4%8D%E8%B1%86/%E5%BC%95%E3%81%8D%E5%89%B2%E3%82%8A%E7%B4%8D%E8%B1%86.html"
+          ,
+          testUriIri
+            "http://点心和烤鸭.w3.mag.keio.ac.jp"
+            "http://xn--0trv4xfvn8el34t.w3.mag.keio.ac.jp/"
+        ]
     ,
     testGroup "Mess" $
     [
