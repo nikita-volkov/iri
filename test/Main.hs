@@ -103,9 +103,17 @@ main =
         (Right "https://www.kupivip.ru/catalog/muzhchinam/odezhda?srcid=goo-tm-open&lpu=|source:google|medium:cpc|adposition:1t1|creative:195388077752|term:%2B%D0%B2%D0%B8%D0%BF%20%2B%D0%BA%D1%83%D0%BF%D0%B8|campaignid:801742449|campaign:goo_tm_mob_s_male|other:m|ad:1|&gclid=CjwKEAjwgb3OBRDNi_2TwZ6u7D4SJADsmW8QKiRxDZZ0hRAnyspAcVW582c7zzQSA7CC0FavPR63dBoCrKPw_wcB")
         (fmap E.uri (D.uri "https://www.kupivip.ru/catalog/muzhchinam/odezhda?srcid=goo-tm-open&lpu=|source:google|medium:cpc|adposition:1t1|creative:195388077752|term:%2B%D0%B2%D0%B8%D0%BF%20%2B%D0%BA%D1%83%D0%BF%D0%B8|campaignid:801742449|campaign:goo_tm_mob_s_male|other:m|ad:1|&gclid=CjwKEAjwgb3OBRDNi_2TwZ6u7D4SJADsmW8QKiRxDZZ0hRAnyspAcVW582c7zzQSA7CC0FavPR63dBoCrKPw_wcB"))
       ,
-      testCase "2" $
-      assertEqual ""
-        (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
-        (fmap show (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+      testGroup "2" $
+      [
+        testCase "show" $
+        assertEqual ""
+          (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
+          (fmap show (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+        ,
+        testCase "Text rendering" $
+        assertEqual ""
+          (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
+          (fmap C.iri (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+      ]
     ]
   ]
