@@ -88,10 +88,8 @@ domainName (RegName vector) =
   F.intercalate domainLabel (char '.') vector
 
 domainLabel :: DomainLabel -> Builder
-domainLabel =
-  \ case
-    AsciiDomainLabel x -> asciiByteString x
-    UnicodeDomainLabel x -> text x
+domainLabel (DomainLabel x) =
+  text x
 
 ipV4 :: IPv4 -> Builder
 ipV4 =

@@ -93,10 +93,10 @@ domainName (RegName vector) =
   F.intercalate domainLabel (asciiChar '.') vector
 
 domainLabel :: DomainLabel -> Poking
-domainLabel =
-  \ case
-    AsciiDomainLabel x -> bytes x
-    UnicodeDomainLabel x -> bytes "xn--" <> bytes (B.encode x)
+domainLabel (DomainLabel value) =
+  if C.all (< '\x80') value
+    then bytes (A.encodeUtf8 value)
+    else bytes "xn--" <> bytes (B.encode value)
 
 ipV4 :: IPv4 -> Poking
 ipV4 =

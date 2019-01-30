@@ -122,7 +122,7 @@ Domain label with Punycode decoding applied.
 domainLabel :: Parser DomainLabel
 domainLabel =
   labeled "Domain label" $
-  UnicodeDomainLabel <$> takeWhile1 (C.unencodedRegName . ord)
+  DomainLabel <$> takeWhile1 (C.unencodedRegName . ord)
 
 {-# INLINE port #-}
 port :: Parser Word16

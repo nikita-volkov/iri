@@ -47,9 +47,7 @@ data Host =
 newtype RegName =
   RegName (Vector DomainLabel)
 
-data DomainLabel =
-  AsciiDomainLabel ByteString |
-  UnicodeDomainLabel Text
+data DomainLabel = DomainLabel Text
 
 data Port =
   PresentPort !Word16 |

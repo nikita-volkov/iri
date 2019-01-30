@@ -212,9 +212,9 @@ domainLabel =
     ascii <- takeWhile1 (C.domainLabel . fromIntegral)
     if punycodeFollows
       then case A.decode ascii of
-        Right text -> return (UnicodeDomainLabel text)
+        Right text -> return (DomainLabel text)
         Left exception -> fail (showString "Punycode decoding exception: " (show exception))
-      else return (AsciiDomainLabel ascii)
+      else return (DomainLabel (B.decodeUtf8 ascii))
 
 {-# INLINE port #-}
 port :: Parser Word16
