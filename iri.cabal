@@ -72,7 +72,7 @@ library
     semigroups >=0.18 && <0.20,
     template-haskell >=2.9 && <3,
     text ==1.*,
-    text-builder >=0.5.4 && <0.6,
+    text-builder >=0.6.5 && <0.7,
     th-lift >=0.7.7 && <0.8,
     th-lift-instances >=0.1.11 && <0.2,
     unordered-containers >=0.2 && <0.3,
