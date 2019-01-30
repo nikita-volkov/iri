@@ -64,12 +64,6 @@ main =
       "https://ru.wikipedia.org/wiki/Баренцбург"
       (show [httpUri|https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3|])
     ,
-    parsing
-  ]
-
-parsing =
-  testGroup "Parsing" $
-  [
     testCase "Messed up URIs" $
     let
       testUri uri =
