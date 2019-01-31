@@ -86,7 +86,7 @@ labeled label parser =
   parser <?> label
 
 {-|
-Parser of a well-formed URI conforming to the RFC3986 standard into IRI.
+Parser of a well-formed URI conforming to the RFC3986 or RFC3987 standards.
 Performs URL- and Punycode-decoding.
 -}
 {-# INLINABLE uri #-}
@@ -202,7 +202,7 @@ regName =
   fmap RegName (E.sepBy1 domainLabel (word8 46))
 
 {-|
-Domain label with Punycode decoding applied.
+Domain label with Punycode decoding applied if need be.
 -}
 {-# INLINE domainLabel #-}
 domainLabel :: Parser DomainLabel
@@ -232,7 +232,7 @@ path =
   where
     segmentsAreEmpty segments =
       S.length segments == 1 &&
-      (case S.unsafeHead segments of PathSegment headSegmentText -> T.null headSegmentText)
+      (case S.unsafeHead segments of PathSegment headSegment -> K.null headSegment)
 
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
@@ -257,10 +257,10 @@ utf8Chunks chunk =
         else fail (showString "UTF8 decoding: Bytes remaining: " (show undecodedBytes))
 
 {-# INLINABLE urlEncodedString #-}
-urlEncodedString :: (Word8 -> Bool) -> Parser Text
+urlEncodedString :: (Word8 -> Bool) -> Parser ByteString
 urlEncodedString unencodedBytesPredicate =
   labeled "URL-encoded string" $
-  utf8Chunks $
+  R.foldByteString $
   takeWhile1 unencodedBytesPredicate <|> encoded
   where
     encoded =
@@ -275,13 +275,13 @@ percentEncodedByte =
     byte2 <- anyWord8
     I.matchPercentEncodedBytes (fail "Broken percent encoding") return byte1 byte2
 
-{-# INLINABLE query #-}
+{-# INLINE query #-}
 query :: Parser Query
 query =
   labeled "Query" $
   (question *> (Query <$> queryOrFragmentBody)) <|> pure (Query mempty)
 
-{-# INLINABLE fragment #-}
+{-# INLINE fragment #-}
 fragment :: Parser Fragment
 fragment =
   labeled "Fragment" $
@@ -291,9 +291,9 @@ fragment =
 The stuff after the question or the hash mark.
 -}
 {-# INLINABLE queryOrFragmentBody #-}
-queryOrFragmentBody :: Parser Text
+queryOrFragmentBody :: Parser ByteString
 queryOrFragmentBody =
-  utf8Chunks $
+  R.foldByteString $
   takeWhile1 (C.unencodedQuery . fromIntegral) <|>
   " " <$ plus <|>
   K.singleton <$> percentEncodedByte

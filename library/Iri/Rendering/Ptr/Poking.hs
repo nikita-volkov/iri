@@ -16,6 +16,7 @@ import qualified Data.Text.Encoding as A
 import qualified Data.Text.Encoding.Error as A
 import qualified Data.Text.Punycode as B
 import qualified Data.Text as C
+import qualified Data.ByteString as ByteString
 import qualified Data.HashMap.Strict as G
 import qualified Data.Vector as H
 import qualified Net.IPv4 as D
@@ -24,7 +25,7 @@ import qualified Iri.Vector as F
 import qualified Iri.CodePointPredicates.Core as I
 import qualified Iri.CodePointPredicates.Rfc3986 as I
 import qualified Iri.Utf8CodePoint as K
-import qualified Iri.Rendering.Poke as L
+import qualified Iri.Rendering.Ptr.Poke as L
 
 
 uri :: Iri -> Poking
@@ -41,7 +42,7 @@ uri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
 
 httpUri :: HttpIri -> Poking
 httpUri (HttpIri (Security secure) hostValue portValue pathValue queryValue fragmentValue) =
-  (if secure then bytes "https://" else bytes "http://") <>
+  (if secure then "https://" else "http://") <>
   host hostValue <>
   prependIfNotNull (asciiChar ':') (port portValue) <>
   prependIfNotNull (asciiChar '/') (path pathValue) <>
@@ -76,9 +77,9 @@ userInfo =
       MissingPassword -> userInfoComponent user
     MissingUserInfo -> mempty
 
-userInfoComponent :: Text -> Poking
+userInfoComponent :: ByteString -> Poking
 userInfoComponent =
-  urlEncodedText I.unencodedUserInfoComponent
+  urlEncodedBytes I.unencodedUserInfoComponent
 
 host :: Host -> Poking
 host =
@@ -117,15 +118,24 @@ path (Path pathSegmentVector) =
 
 pathSegment :: PathSegment -> Poking
 pathSegment (PathSegment value) =
-  urlEncodedText I.unencodedPathSegment value
+  urlEncodedBytes I.unencodedPathSegment value
 
 query :: Query -> Poking
 query (Query value) =
-  urlEncodedText I.unencodedQuery value
+  urlEncodedBytes I.unencodedQuery value
 
 fragment :: Fragment -> Poking
 fragment (Fragment value) =
-  urlEncodedText I.unencodedFragment value
+  urlEncodedBytes I.unencodedFragment value
+
+urlEncodedBytes :: I.Predicate -> ByteString -> Poking
+urlEncodedBytes unencodedPredicate =
+  ByteString.foldl' (\ poking -> mappend poking . byte) mempty
+  where
+    byte x =
+      if unencodedPredicate (fromIntegral x)
+        then word8 x
+        else urlEncodedByte x
 
 {-| Apply URL-encoding to text -}
 urlEncodedText :: I.Predicate -> Text -> Poking

@@ -17,9 +17,11 @@ import qualified Data.Vector as H
 import qualified Net.IPv4 as D
 import qualified Net.IPv6 as E
 import qualified Iri.Vector as F
-import qualified Iri.CodePointPredicates.Core as I
-import qualified Iri.CodePointPredicates.Rfc3987 as I
+import qualified Iri.CodePointPredicates.Core as CorePredicates
+import qualified Iri.CodePointPredicates.Rfc3987 as Rfc3987Predicates
+import qualified Iri.CodePointPredicates.Rfc3986 as Rfc3986Predicates
 import qualified Iri.Utf8CodePoint as K
+import qualified Data.ByteString as ByteString
 
 
 iri :: Iri -> Builder
@@ -71,9 +73,9 @@ userInfo =
       MissingPassword -> userInfoComponent user
     MissingUserInfo -> mempty
 
-userInfoComponent :: Text -> Builder
+userInfoComponent :: ByteString -> Builder
 userInfoComponent =
-  urlEncodedText I.unencodedUserInfoComponent
+  urlEncodedBytesOrText Rfc3987Predicates.unencodedUserInfoComponent Rfc3986Predicates.unencodedUserInfoComponent
 
 host :: Host -> Builder
 host =
@@ -87,8 +89,8 @@ domainName (RegName vector) =
   F.intercalate domainLabel (char '.') vector
 
 domainLabel :: DomainLabel -> Builder
-domainLabel (DomainLabel value) =
-  text value
+domainLabel (DomainLabel x) =
+  text x
 
 ipV4 :: IPv4 -> Builder
 ipV4 =
@@ -110,22 +112,37 @@ path (Path pathSegmentVector) =
 
 pathSegment :: PathSegment -> Builder
 pathSegment (PathSegment value) =
-  urlEncodedText I.unencodedPathSegment value
+  urlEncodedBytesOrText Rfc3987Predicates.unencodedPathSegment Rfc3986Predicates.unencodedPathSegment value
 
 query :: Query -> Builder
 query (Query value) =
-  urlEncodedText I.unencodedQuery value
+  urlEncodedBytesOrText Rfc3987Predicates.unencodedQuery Rfc3986Predicates.unencodedQuery value
 
 fragment :: Fragment -> Builder
 fragment (Fragment value) =
-  urlEncodedText I.unencodedFragment value
+  urlEncodedBytesOrText Rfc3987Predicates.unencodedFragment Rfc3986Predicates.unencodedFragment value
+
+urlEncodedBytesOrText :: CorePredicates.Predicate -> CorePredicates.Predicate -> ByteString -> Builder
+urlEncodedBytesOrText unencodedPredicate1 unencodedPredicate2 bytes =
+  case A.decodeUtf8' bytes of
+    Right text -> urlEncodedText unencodedPredicate1 text
+    Left _ -> urlEncodedBytes unencodedPredicate2 bytes
 
 {-| Apply URL-encoding to text -}
-urlEncodedText :: I.Predicate -> Text -> Builder
+urlEncodedBytes :: CorePredicates.Predicate -> ByteString -> Builder
+urlEncodedBytes unencodedPredicate =
+  ByteString.foldl'
+    (\ builder -> mappend builder . \ byte -> if unencodedPredicate (fromIntegral byte)
+      then utf8CodeUnits1 byte
+      else urlEncodedByte byte)
+    mempty
+
+{-| Apply URL-encoding to text -}
+urlEncodedText :: CorePredicates.Predicate -> Text -> Builder
 urlEncodedText unencodedPredicate =
   C.foldl' (\ builder -> mappend builder . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
 
-urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Builder
+urlEncodedUnicodeCodePoint :: CorePredicates.Predicate -> Int -> Builder
 urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
   if unencodedPredicate codePoint
     then

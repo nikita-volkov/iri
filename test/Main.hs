@@ -64,12 +64,6 @@ main =
       "https://ru.wikipedia.org/wiki/Баренцбург"
       (show [httpUri|https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3|])
     ,
-    parsing
-  ]
-
-parsing =
-  testGroup "Parsing" $
-  [
     testCase "Messed up URIs" $
     let
       testUri uri =
@@ -83,10 +77,24 @@ parsing =
     testCase "User Info" $
     assertEqual "" (Right "http://user:password@localhost:993") (fmap E.uri (D.uri "http://user:password@localhost:993"))
     ,
-    testCase "URI, IRI" $
-    assertEqual ""
-      (D.uri "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3")
-      (F.iri "https://ru.wikipedia.org/wiki/Баренцбург")
+    testGroup "IRI parser vs. URI parser" $ let
+      testUriIri iri uri =
+        testCase (iri <> " vs. " <> uri) $
+        assertEqual "" (F.iri (fromString iri)) (D.uri (fromString uri))
+      in
+        [
+          testUriIri
+            "https://ru.wikipedia.org/wiki/Баренцбург"
+            "https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D1%80%D0%B5%D0%BD%D1%86%D0%B1%D1%83%D1%80%D0%B3"
+          ,
+          testUriIri
+            "https://www.w3.org/International/articles/idn-and-iri/JP納豆/引き割り納豆.html"
+            "https://www.w3.org/International/articles/idn-and-iri/JP%E7%B4%8D%E8%B1%86/%E5%BC%95%E3%81%8D%E5%89%B2%E3%82%8A%E7%B4%8D%E8%B1%86.html"
+          ,
+          testUriIri
+            "http://点心和烤鸭.w3.mag.keio.ac.jp"
+            "http://xn--0trv4xfvn8el34t.w3.mag.keio.ac.jp/"
+        ]
     ,
     testGroup "Mess" $
     [
@@ -95,9 +103,17 @@ parsing =
         (Right "https://www.kupivip.ru/catalog/muzhchinam/odezhda?srcid=goo-tm-open&lpu=|source:google|medium:cpc|adposition:1t1|creative:195388077752|term:%2B%D0%B2%D0%B8%D0%BF%20%2B%D0%BA%D1%83%D0%BF%D0%B8|campaignid:801742449|campaign:goo_tm_mob_s_male|other:m|ad:1|&gclid=CjwKEAjwgb3OBRDNi_2TwZ6u7D4SJADsmW8QKiRxDZZ0hRAnyspAcVW582c7zzQSA7CC0FavPR63dBoCrKPw_wcB")
         (fmap E.uri (D.uri "https://www.kupivip.ru/catalog/muzhchinam/odezhda?srcid=goo-tm-open&lpu=|source:google|medium:cpc|adposition:1t1|creative:195388077752|term:%2B%D0%B2%D0%B8%D0%BF%20%2B%D0%BA%D1%83%D0%BF%D0%B8|campaignid:801742449|campaign:goo_tm_mob_s_male|other:m|ad:1|&gclid=CjwKEAjwgb3OBRDNi_2TwZ6u7D4SJADsmW8QKiRxDZZ0hRAnyspAcVW582c7zzQSA7CC0FavPR63dBoCrKPw_wcB"))
       ,
-      testCase "2" $
-      assertEqual ""
-        (Right "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html")
-        (fmap show (D.uri "https://www.pleer.ru/search_%E4%EB%FF+%E1%E5%EB%FC%FF+%F1%F3%F8%E8%EB%EA%E0.html"))
+      testGroup "2" $
+      [
+        testCase "show" $
+        assertEqual ""
+          (Right "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html")
+          (fmap show (D.uri "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html"))
+        ,
+        testCase "Text rendering" $
+        assertEqual ""
+          (Right "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html")
+          (fmap C.iri (D.uri "https://www.pleer.ru/search_%e4%eb%ff+%e1%e5%eb%fc%ff+%f1%f3%f8%e8%eb%ea%e0.html"))
+      ]
     ]
   ]

@@ -1,7 +1,9 @@
 module Iri.MonadPlus
 where
 
-import Iri.Prelude hiding (null, length)
+import Iri.Prelude hiding (foldl)
+import qualified Ptr.ByteString as ByteString
+import qualified Ptr.Poking as Poking
 
 
 {-# INLINE foldl #-}
@@ -28,3 +30,13 @@ foldlM step start elementParser =
             element <- elementParser
             return (step state element >>= loop))
           (return (return state)))
+
+{-# INLINE foldByteString #-}
+foldByteString :: MonadPlus m => m ByteString -> m ByteString
+foldByteString =
+  fmap ByteString.poking .
+  foldl (\ poking -> mappend poking . Poking.bytes) mempty
+
+{-# INLINE fold #-}
+fold :: (MonadPlus m, Monoid a) => m a -> m a
+fold = foldl mappend mempty
