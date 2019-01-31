@@ -14,26 +14,22 @@ import Iri.Prelude
 {-|
 Thorough structure of IRI or URI.
 -}
-data Iri =
-  Iri !Scheme !Hierarchy !Query !Fragment
+data Iri = Iri !Scheme !Hierarchy !Query !Fragment
 
-newtype Scheme =
-  Scheme ByteString
+newtype Scheme = Scheme ByteString
 
 data Hierarchy =
   AuthorisedHierarchy !Authority !Path |
   AbsoluteHierarchy !Path |
   RelativeHierarchy !Path
 
-data Authority =
-  Authority !UserInfo !Host !Port
+data Authority = Authority !UserInfo !Host !Port
 
 data UserInfo =
   PresentUserInfo !User !Password |
   MissingUserInfo
 
-newtype User =
-  User ByteString
+newtype User = User ByteString
 
 data Password =
   PresentPassword !ByteString |
@@ -44,8 +40,7 @@ data Host =
   IpV4Host !IPv4 |
   IpV6Host !IPv6
 
-newtype RegName =
-  RegName (Vector DomainLabel)
+newtype RegName = RegName (Vector DomainLabel)
 
 data DomainLabel = DomainLabel Text
 
@@ -53,11 +48,9 @@ data Port =
   PresentPort !Word16 |
   MissingPort
 
-newtype Path =
-  Path (Vector PathSegment)
+newtype Path = Path (Vector PathSegment)
 
-newtype PathSegment =
-  PathSegment ByteString
+newtype PathSegment = PathSegment ByteString
 
 {-|
 Since the exact structure of the query string is not standardised and
@@ -66,11 +59,9 @@ we simply represent it as percent-decoded bytes.
 
 See <https://en.wikipedia.org/wiki/Query_string>.
 -}
-newtype Query =
-  Query ByteString
+newtype Query = Query ByteString
 
-newtype Fragment =
-  Fragment ByteString
+newtype Fragment = Fragment ByteString
 
 
 -- * Special cases
@@ -91,8 +82,6 @@ Compared to the general URI definition it:
 * requires the Host component
 * requires the Path component to be absolute
 -}
-data HttpIri =
-  HttpIri !Security !Host !Port !Path !Query !Fragment
+data HttpIri = HttpIri !Security !Host !Port !Path !Query !Fragment
 
-newtype Security =
-  Security Bool
+newtype Security = Security Bool
