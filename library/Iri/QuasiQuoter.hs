@@ -51,7 +51,7 @@ iri :: QuasiQuoter
 iri =
   exp $ \ string ->
   case C.parseOnly (D.iri <* C.endOfInput) (fromString string) of
-    Right uri -> lift uri
+    Right iri -> lift iri
     Left error -> fail (showString "IRI parsing: " error)
 
 {-|
@@ -61,5 +61,5 @@ httpIri :: QuasiQuoter
 httpIri =
   exp $ \ string ->
   case C.parseOnly (D.httpIri <* C.endOfInput) (fromString string) of
-    Right uri -> lift uri
+    Right iri -> lift iri
     Left error -> fail (showString "HTTP IRI parsing: " error)

@@ -23,7 +23,7 @@ textIriIri =
 
 textIriHttpIri :: Prism' Text HttpIri
 textIriHttpIri =
-  textIriIri . uriHttpIri
+  textIriIri . iriHttpIri
 
 -- ** ByteString
 -------------------------
@@ -34,28 +34,28 @@ byteStringIri =
 
 byteStringHttpIri :: Prism' ByteString HttpIri
 byteStringHttpIri =
-  byteStringIri . uriHttpIri
+  byteStringIri . iriHttpIri
 
 byteStringTextInUtf8 :: Prism' ByteString Text
 byteStringTextInUtf8 = prism' Text.encodeUtf8 (either (const Nothing) Just . Text.decodeUtf8')
 
--- ** URI
+-- ** IRI
 -------------------------
 
-uriHttpIri :: Prism' Iri HttpIri
-uriHttpIri = prism' iriFromHttpIri (either (const Nothing) Just . httpIriFromIri)
+iriHttpIri :: Prism' Iri HttpIri
+iriHttpIri = prism' iriFromHttpIri (either (const Nothing) Just . httpIriFromIri)
 
-uriScheme :: Lens' Iri Scheme
-uriScheme = lens (\ (Iri x _ _ _) -> x) (\ (Iri _ hierarchy query fragment) x -> Iri x hierarchy query fragment)
+iriScheme :: Lens' Iri Scheme
+iriScheme = lens (\ (Iri x _ _ _) -> x) (\ (Iri _ hierarchy query fragment) x -> Iri x hierarchy query fragment)
 
-uriHierarchy :: Lens' Iri Hierarchy
-uriHierarchy = lens (\ (Iri _ x _ _) -> x) (\ (Iri scheme _ query fragment) x -> Iri scheme x query fragment)
+iriHierarchy :: Lens' Iri Hierarchy
+iriHierarchy = lens (\ (Iri _ x _ _) -> x) (\ (Iri scheme _ query fragment) x -> Iri scheme x query fragment)
 
-uriQuery :: Lens' Iri Query
-uriQuery = lens (\ (Iri _ _ x _) -> x) (\ (Iri scheme hierarchy _ fragment) x -> Iri scheme hierarchy x fragment)
+iriQuery :: Lens' Iri Query
+iriQuery = lens (\ (Iri _ _ x _) -> x) (\ (Iri scheme hierarchy _ fragment) x -> Iri scheme hierarchy x fragment)
 
-uriFragment :: Lens' Iri Fragment
-uriFragment = lens (\ (Iri _ _ _ x) -> x) (\ (Iri scheme hierarchy query _) x -> Iri scheme hierarchy query x)
+iriFragment :: Lens' Iri Fragment
+iriFragment = lens (\ (Iri _ _ _ x) -> x) (\ (Iri scheme hierarchy query _) x -> Iri scheme hierarchy query x)
 
 -- ** Scheme
 -------------------------

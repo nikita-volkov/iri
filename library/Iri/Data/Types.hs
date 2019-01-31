@@ -12,7 +12,7 @@ import Iri.Prelude
 
 
 {-|
-Thorough structure of URI.
+Thorough structure of IRI or URI.
 -}
 data Iri =
   Iri !Scheme !Hierarchy !Query !Fragment
