@@ -36,9 +36,6 @@ byteStringHttpIri :: Prism' ByteString HttpIri
 byteStringHttpIri =
   byteStringIri . uriHttpIri
 
-byteStringIriQuery :: Lens' ByteString Query
-byteStringIriQuery = undefined
-
 byteStringTextInUtf8 :: Prism' ByteString Text
 byteStringTextInUtf8 = prism' Text.encodeUtf8 (either (const Nothing) Just . Text.decodeUtf8')
 
@@ -57,12 +54,6 @@ uriHierarchy = lens (\ (Iri _ x _ _) -> x) (\ (Iri scheme _ query fragment) x ->
 uriQuery :: Lens' Iri Query
 uriQuery = lens (\ (Iri _ _ x _) -> x) (\ (Iri scheme hierarchy _ fragment) x -> Iri scheme hierarchy x fragment)
 
-uriParametricQuery :: Traversal' Iri ParametricQuery
-uriParametricQuery = uriQuery . queryParametricQuery
-
-uriUnicodeParametricQueryInUtf8 :: Traversal' Iri UnicodeParametricQuery
-uriUnicodeParametricQueryInUtf8 = uriQuery . queryUnicodeParametricQueryInUtf8
-
 uriFragment :: Lens' Iri Fragment
 uriFragment = lens (\ (Iri _ _ _ x) -> x) (\ (Iri scheme hierarchy query _) x -> Iri scheme hierarchy query x)
 
@@ -71,21 +62,6 @@ uriFragment = lens (\ (Iri _ _ _ x) -> x) (\ (Iri scheme hierarchy query _) x ->
 
 schemeByteString :: Lens' Scheme ByteString
 schemeByteString = lens (\ (Scheme x) -> x) (const Scheme)
-
--- ** Query
--------------------------
-
-queryParametricQuery :: Prism' Query ParametricQuery
-queryParametricQuery = undefined
-
-queryUnicodeParametricQueryInUtf8 :: Prism' Query UnicodeParametricQuery
-queryUnicodeParametricQueryInUtf8 = queryParametricQuery . parametricQueryUnicodeParametricQueryInUtf8
-
--- ** Parametric query
--------------------------
-
-parametricQueryUnicodeParametricQueryInUtf8 :: Prism' ParametricQuery UnicodeParametricQuery
-parametricQueryUnicodeParametricQueryInUtf8 = undefined
 
 -- ** Fragment
 -------------------------

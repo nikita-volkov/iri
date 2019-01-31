@@ -96,21 +96,3 @@ data HttpIri =
 
 newtype Security =
   Security Bool
-
--- ** Parametric query representations
--------------------------
-
-{-|
-Parsed representation of a query, which conforms to the parametric standard.
-Not all queries can be parsed like that.
-
-Keys and values are represented as percent-decoded bytes.
--}
-newtype ParametricQuery =
-  ParametricQuery (HashMap ByteString (Vector ByteString))
-
-{-|
-Same as 'ParametricQuery' only with values represented by Unicode strings.
--}
-newtype UnicodeParametricQuery =
-  UnicodeParametricQuery (HashMap Text (Vector Text))
