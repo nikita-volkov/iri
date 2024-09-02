@@ -102,7 +102,7 @@ library
 
   build-depends:
     , attoparsec >=0.13 && <0.15
-    , base >=4.14 && <5
+    , base >=4.15 && <5
     , bytestring >=0.10 && <0.13
     , contravariant >=1.4 && <2
     , hashable >=1.2 && <2
@@ -110,7 +110,7 @@ library
     , iri:punycode
     , profunctors >=5.2 && <6
     , ptr >=0.16.1 && <0.17
-    , template-haskell >=2.14 && <3
+    , template-haskell >=2.17 && <3
     , text >=2 && <3
     , text-builder >=0.6.7.2 && <0.7
     , th-lift >=0.8 && <0.9
@@ -125,7 +125,7 @@ library punycode
   hs-source-dirs:   punycode
   default-language: Haskell2010
   build-depends:
-    , base
+    , base >=4.15 && <5
     , bytestring >=0.10 && <0.13
     , cereal >=0.5.8.3 && <0.6
     , mtl >=2 && <3
