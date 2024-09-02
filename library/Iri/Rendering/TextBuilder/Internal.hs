@@ -1,6 +1,20 @@
 module Iri.Rendering.TextBuilder.Internal
   ( iri,
     httpIri,
+    scheme,
+    hierarchy,
+    authority,
+    userInfo,
+    host,
+    regName,
+    domainLabel,
+    ipV4,
+    ipV6,
+    port,
+    path,
+    pathSegment,
+    query,
+    fragment,
   )
 where
 
@@ -77,12 +91,12 @@ userInfoComponent =
 host :: Host -> Builder
 host =
   \case
-    NamedHost value -> domainName value
+    NamedHost value -> regName value
     IpV4Host value -> ipV4 value
     IpV6Host value -> ipV6 value
 
-domainName :: RegName -> Builder
-domainName (RegName vector) =
+regName :: RegName -> Builder
+regName (RegName vector) =
   F.intercalate domainLabel (char '.') vector
 
 domainLabel :: DomainLabel -> Builder
