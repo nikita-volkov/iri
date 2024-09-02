@@ -1,18 +1,16 @@
-module Iri.Rendering.ByteString
-where
+module Iri.Rendering.ByteString where
 
-import Iri.Prelude
 import Iri.Data
-import qualified Iri.Rendering.Ptr.Poking as A
-import qualified Ptr.ByteString as F
+import Iri.Prelude
+import Iri.Rendering.Ptr.Poking qualified as A
+import Ptr.ByteString qualified as F
 
-
-{-| Render as URI ASCII bytes -}
+-- | Render as URI ASCII bytes
 uri :: Iri -> ByteString
 uri =
   F.poking . A.uri
 
-{-| Render as URI ASCII bytes -}
+-- | Render as URI ASCII bytes
 httpUri :: HttpIri -> ByteString
 httpUri =
   F.poking . A.httpUri

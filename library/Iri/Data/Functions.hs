@@ -1,11 +1,9 @@
-module Iri.Data.Functions
-where
+module Iri.Data.Functions where
 
-import Iri.Prelude
 import Iri.Data.Types
+import Iri.Prelude
 
-
-{-| Try to specialize a general IRI to HTTP -}
+-- | Try to specialize a general IRI to HTTP
 httpIriFromIri :: Iri -> Either Text HttpIri
 httpIriFromIri (Iri (Scheme scheme) hierarchy query fragment) =
   do
@@ -19,7 +17,7 @@ httpIriFromIri (Iri (Scheme scheme) hierarchy query fragment) =
         PresentUserInfo (User user) _ -> Left ("User Info is present")
       _ -> Left ("Not an authorised hierarchy")
 
-{-| Generalize an HTTP IRI to IRI -}
+-- | Generalize an HTTP IRI to IRI
 iriFromHttpIri :: HttpIri -> Iri
 iriFromHttpIri (HttpIri (Security secure) host port path query fragment) =
   Iri scheme hierarchy query fragment

@@ -1,10 +1,8 @@
-module Iri.Optics.Basics
-where
+module Iri.Optics.Basics where
 
 import Iri.Prelude
 
-
-type Lens s t a b = forall f. Functor f => (a -> f b) -> s -> f t
+type Lens s t a b = forall f. (Functor f) => (a -> f b) -> s -> f t
 
 type Lens' s a = Lens s s a a
 
@@ -12,7 +10,7 @@ type Prism s t a b = forall p f. (Choice p, Applicative f) => p a (f b) -> p s (
 
 type Prism' s a = Prism s s a a
 
-type Traversal s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
+type Traversal s t a b = forall f. (Applicative f) => (a -> f b) -> s -> f t
 
 type Traversal' s a = Traversal s s a a
 

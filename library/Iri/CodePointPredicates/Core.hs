@@ -1,9 +1,7 @@
-module Iri.CodePointPredicates.Core
-where
+module Iri.CodePointPredicates.Core where
 
-import Iri.Prelude hiding ((|||), (&&&), inRange, Predicate)
-import qualified Data.Vector.Unboxed as A
-
+import Data.Vector.Unboxed qualified as A
+import Iri.Prelude hiding (Predicate, inRange, (&&&), (|||))
 
 type Predicate =
   Int -> Bool
@@ -19,11 +17,13 @@ oneOfChars string i =
   elem i (fmap ord string)
 
 infixr 2 |||
+
 (|||) :: Predicate -> Predicate -> Predicate
 (|||) left right i =
   left i || right i
 
 infixr 3 &&&
+
 (&&&) :: Predicate -> Predicate -> Predicate
 (&&&) left right i =
   left i && right i
@@ -36,7 +36,7 @@ inCharRange :: Char -> Char -> Predicate
 inCharRange min max =
   inRange (ord min) (ord max)
 
-{-| 7-bit -}
+-- | 7-bit
 septimal :: Predicate
 septimal i =
   i < 0x80
@@ -47,11 +47,13 @@ nonSeptimal i =
 
 control :: Predicate
 control i =
-  i <= 0x1F ||
-  i == 0x7F
+  i
+    <= 0x1F
+    || i
+    == 0x7F
 
 asciiAlphanumeric :: Predicate
 asciiAlphanumeric =
-  inCharRange 'a' 'z' |||
-  inCharRange 'A' 'Z' |||
-  inCharRange '0' '9'
+  inCharRange 'a' 'z'
+    ||| inCharRange 'A' 'Z'
+    ||| inCharRange '0' '9'

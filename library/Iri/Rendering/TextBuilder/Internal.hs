@@ -145,8 +145,7 @@ urlEncodedText unencodedPredicate =
 urlEncodedUnicodeCodePoint :: CorePredicates.Predicate -> Int -> Builder
 urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
   if unencodedPredicate codePoint
-    then
-      unicodeCodePoint codePoint
+    then unicodeCodePoint codePoint
     else
       K.unicodeCodePoint
         codePoint
