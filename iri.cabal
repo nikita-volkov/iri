@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          iri
-version:       0.4
+version:       0.5
 category:      URI, URL, IRI, Network
 synopsis:      RFC-based resource identifier library
 description:
