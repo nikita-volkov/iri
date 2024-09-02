@@ -1,38 +1,46 @@
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
 module Iri.Parsing.Attoparsec.Text
-(
-  iri,
-  httpIri,
-)
+  ( iri,
+    httpIri,
+    hierarchy,
+    scheme,
+    host,
+    regName,
+    domainLabel,
+    port,
+    path,
+    pathSegment,
+    query,
+    fragment,
+  )
 where
 
-import Iri.Prelude
-import Iri.Data
 import Data.Attoparsec.Text hiding (try)
-import qualified Data.ByteString as K
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as B
-import qualified Data.Text.Encoding.Error as L
-import qualified Data.Vector as S
-import qualified VectorBuilder.MonadPlus as E
-import qualified Iri.CodePointPredicates.Rfc3987 as C
-import qualified Iri.MonadPlus as R
-import qualified Text.Builder as J
-import qualified Net.IPv4 as M
-import qualified Net.IPv6 as N
-import qualified Ptr.ByteString as ByteString
-import qualified Ptr.Poking as Poking
-
+import Data.ByteString qualified as K
+import Data.Text.Encoding qualified as B
+import Data.Text.Encoding.Error qualified as L
+import Data.Vector qualified as S
+import Iri.CodePointPredicates.Rfc3987 qualified as C
+import Iri.Data
+import Iri.MonadPlus qualified as R
+import Iri.Prelude
+import Net.IPv4 qualified as M
+import Net.IPv6 qualified as N
+import Ptr.ByteString qualified as ByteString
+import Ptr.Poking qualified as Poking
+import Text.Builder qualified as J
+import VectorBuilder.MonadPlus qualified as E
 
 {-# INLINE labeled #-}
 labeled :: String -> Parser a -> Parser a
 labeled label parser =
   parser <?> label
 
-{-|
-Parser of a well-formed IRI conforming to the RFC3987 standard into 'Iri'.
-Performs URL-decoding.
--}
-{-# INLINABLE iri #-}
+-- |
+-- Parser of a well-formed IRI conforming to the RFC3987 standard into 'Iri'.
+-- Performs URL-decoding.
+{-# INLINEABLE iri #-}
 iri :: Parser Iri
 iri =
   labeled "IRI" $ do
@@ -43,15 +51,14 @@ iri =
     parsedFragment <- fragment
     return (Iri parsedScheme parsedHierarchy parsedQuery parsedFragment)
 
-{-|
-Same as 'iri', but optimized specifially for the case of HTTP IRIs.
--}
-{-# INLINABLE httpIri #-}
+-- |
+-- Same as 'iri', but optimized specifially for the case of HTTP IRIs.
+{-# INLINEABLE httpIri #-}
 httpIri :: Parser HttpIri
 httpIri =
   labeled "HTTP IRI" $ do
     asciiCI "http"
-    secure <- satisfy (\ x -> x == 's' || x == 'S') $> True <|> pure False
+    secure <- satisfy (\x -> x == 's' || x == 'S') $> True <|> pure False
     string "://"
     parsedHost <- host
     parsedPort <- PresentPort <$> (char ':' *> port) <|> pure MissingPort
@@ -86,43 +93,46 @@ authorisedHierarchyBody body =
 {-# INLINE scheme #-}
 scheme :: Parser Scheme
 scheme =
-  labeled "Scheme" $
-  fmap (Scheme . B.encodeUtf8) (takeWhile1 (C.scheme . ord))
+  labeled "Scheme"
+    $ fmap (Scheme . B.encodeUtf8) (takeWhile1 (C.scheme . ord))
 
-{-# INLINABLE presentUserInfo #-}
+{-# INLINEABLE presentUserInfo #-}
 presentUserInfo :: (User -> Password -> a) -> Parser a
 presentUserInfo result =
-  labeled "User info" $
-  do
-    user <- User <$> urlEncodedComponent (C.unencodedUserInfoComponent . ord)
-    passwordFollows <- True <$ char ':' <|> pure False
-    if passwordFollows
-      then do
-        password <- PresentPassword <$> urlEncodedComponent (C.unencodedUserInfoComponent . ord)
-        return (result user password)
-      else return (result user MissingPassword)
+  labeled "User info"
+    $ do
+      user <- User <$> urlEncodedComponent (C.unencodedUserInfoComponent . ord)
+      passwordFollows <- True <$ char ':' <|> pure False
+      if passwordFollows
+        then do
+          password <- PresentPassword <$> urlEncodedComponent (C.unencodedUserInfoComponent . ord)
+          return (result user password)
+        else return (result user MissingPassword)
 
 {-# INLINE host #-}
 host :: Parser Host
 host =
-  labeled "Host" $
-  IpV6Host <$> N.parser <|>
-  IpV4Host <$> M.parser <|>
-  NamedHost <$> domainName
+  labeled "Host"
+    $ IpV6Host
+    <$> N.parser
+    <|> IpV4Host
+    <$> M.parser
+    <|> NamedHost
+    <$> regName
 
-{-# INLINE domainName #-}
-domainName :: Parser RegName
-domainName =
+{-# INLINE regName #-}
+regName :: Parser RegName
+regName =
   fmap RegName (E.sepBy1 domainLabel (char '.'))
 
-{-|
-Domain label with Punycode decoding applied.
--}
+-- |
+-- Domain label with Punycode decoding applied.
 {-# INLINE domainLabel #-}
 domainLabel :: Parser DomainLabel
 domainLabel =
-  labeled "Domain label" $
-  DomainLabel <$> takeWhile1 (C.unencodedRegName . ord)
+  labeled "Domain label"
+    $ DomainLabel
+    <$> takeWhile1 (C.unencodedRegName . ord)
 
 {-# INLINE port #-}
 port :: Parser Word16
@@ -139,31 +149,34 @@ path =
       else return (Path segments)
   where
     segmentsAreEmpty segments =
-      S.length segments == 1 &&
-      (case S.unsafeHead segments of PathSegment headSegment -> K.null headSegment)
+      S.length segments
+        == 1
+        && (case S.unsafeHead segments of PathSegment headSegment -> K.null headSegment)
 
 {-# INLINE pathSegment #-}
 pathSegment :: Parser PathSegment
 pathSegment =
   fmap PathSegment (urlEncodedComponent (C.unencodedPathSegment . ord))
 
-{-# INLINABLE urlEncodedComponent #-}
+{-# INLINEABLE urlEncodedComponent #-}
 urlEncodedComponent :: (Char -> Bool) -> Parser ByteString
 urlEncodedComponent unencodedCharPredicate =
-  labeled "URL-encoded component" $
-  fmap ByteString.poking $
-  R.fold $
-  (Poking.bytes . B.encodeUtf8 <$> takeWhile1 unencodedCharPredicate) <|> (Poking.word8 <$> urlEncodedByte)
+  labeled "URL-encoded component"
+    $ fmap ByteString.poking
+    $ R.fold
+    $ (Poking.bytes . B.encodeUtf8 <$> takeWhile1 unencodedCharPredicate)
+    <|> (Poking.word8 <$> urlEncodedByte)
 
-{-# INLINABLE urlEncodedComponentText #-}
+{-# INLINEABLE urlEncodedComponentText #-}
 urlEncodedComponentText :: (Char -> Bool) -> Parser Text
 urlEncodedComponentText unencodedCharPredicate =
-  labeled "URL-encoded component" $
-  fmap J.run $
-  R.foldl mappend mempty $
-  (J.text <$> takeWhile1 unencodedCharPredicate) <|> urlEncodedSequenceTextBuilder
+  labeled "URL-encoded component"
+    $ fmap J.run
+    $ R.foldl mappend mempty
+    $ (J.text <$> takeWhile1 unencodedCharPredicate)
+    <|> urlEncodedSequenceTextBuilder
 
-{-# INLINABLE urlEncodedSequenceTextBuilder #-}
+{-# INLINEABLE urlEncodedSequenceTextBuilder #-}
 urlEncodedSequenceTextBuilder :: Parser J.Builder
 urlEncodedSequenceTextBuilder =
   labeled "URL-encoded sequence" $ do
@@ -176,6 +189,8 @@ urlEncodedSequenceTextBuilder =
           return (builder <> J.text decodedChunk, undecodedBytes, newDecode)
         Left (L.DecodeError error _) ->
           fail (showString "UTF8 decoding: " error)
+        Left _ ->
+          fail "Unexpected decoding error"
     finish (builder, undecodedBytes, _) =
       if K.null undecodedBytes
         then return builder
@@ -185,7 +200,7 @@ urlEncodedSequenceTextBuilder =
 urlEncodedByte :: Parser Word8
 urlEncodedByte =
   do
-    char '%' 
+    char '%'
     digit1 <- fromIntegral <$> hexadecimalDigit
     digit2 <- fromIntegral <$> hexadecimalDigit
     return (shiftL digit1 4 .|. digit2)
@@ -198,29 +213,31 @@ hexadecimalDigit =
     let x = ord c
     if x >= 48 && x < 58
       then return (x - 48)
-      else if x >= 65 && x < 71
-        then return (x - 55)
-        else if x >= 97 && x < 103
-          then return (x - 97)
-          else fail ("Not a hexadecimal digit: " <> show c)
+      else
+        if x >= 65 && x < 71
+          then return (x - 55)
+          else
+            if x >= 97 && x < 103
+              then return (x - 97)
+              else fail ("Not a hexadecimal digit: " <> show c)
 
-{-# INLINABLE query #-}
+{-# INLINEABLE query #-}
 query :: Parser Query
 query =
-  labeled "Query" $
-  (char '?' *> queryBody) <|> pure (Query mempty)
+  labeled "Query"
+    $ (char '?' *> queryBody)
+    <|> pure (Query mempty)
 
-{-|
-The stuff after the question mark.
--}
-{-# INLINABLE queryBody #-}
+-- |
+-- The stuff after the question mark.
+{-# INLINEABLE queryBody #-}
 queryBody :: Parser Query
 queryBody =
   fmap Query (urlEncodedComponent (C.unencodedQuery . ord))
 
-{-# INLINABLE fragment #-}
+{-# INLINEABLE fragment #-}
 fragment :: Parser Fragment
 fragment =
-  labeled "Fragment" $
-  (char '#' *> (Fragment <$> urlEncodedComponent (C.unencodedFragment . ord))) <|>
-  pure (Fragment mempty)
+  labeled "Fragment"
+    $ (char '#' *> (Fragment <$> urlEncodedComponent (C.unencodedFragment . ord)))
+    <|> pure (Fragment mempty)

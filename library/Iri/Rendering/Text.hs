@@ -1,8 +1,6 @@
 module Iri.Rendering.Text
-(
-  module Iri.Rendering.Text.Internal,
-)
+  ( module Iri.Rendering.Text.Internal,
+  )
 where
 
 import Iri.Rendering.Text.Internal
-import Iri.Data

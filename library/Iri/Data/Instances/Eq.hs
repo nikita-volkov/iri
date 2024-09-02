@@ -1,9 +1,9 @@
-module Iri.Data.Instances.Eq
-where
+{-# OPTIONS_GHC -Wno-orphans #-}
 
-import Iri.Prelude
+module Iri.Data.Instances.Eq where
+
 import Iri.Data.Types
-
+import Iri.Prelude
 
 deriving instance Eq Iri
 

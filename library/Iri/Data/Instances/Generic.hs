@@ -1,9 +1,9 @@
-module Iri.Data.Instances.Generic
-where
+{-# OPTIONS_GHC -Wno-orphans #-}
 
-import Iri.Prelude
+module Iri.Data.Instances.Generic where
+
 import Iri.Data.Types
-
+import Iri.Prelude
 
 deriving instance Generic Iri
 

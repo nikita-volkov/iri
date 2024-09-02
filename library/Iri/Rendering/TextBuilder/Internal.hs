@@ -1,49 +1,46 @@
 module Iri.Rendering.TextBuilder.Internal
-(
-  iri,
-  httpIri,
-)
+  ( iri,
+    httpIri,
+  )
 where
 
-import Iri.Prelude hiding (null)
+import Data.ByteString qualified as ByteString
+import Data.Text qualified as C
+import Data.Text.Encoding qualified as A
+import Data.Text.Encoding.Error qualified as A
+import Iri.CodePointPredicates.Core qualified as CorePredicates
+import Iri.CodePointPredicates.Rfc3986 qualified as Rfc3986Predicates
+import Iri.CodePointPredicates.Rfc3987 qualified as Rfc3987Predicates
 import Iri.Data.Types
+import Iri.Prelude hiding (null)
+import Iri.Utf8CodePoint qualified as K
+import Iri.Vector qualified as F
+import Net.IPv4 qualified as D
+import Net.IPv6 qualified as E
 import Text.Builder
-import qualified Data.Text.Encoding as A
-import qualified Data.Text.Encoding.Error as A
-import qualified Data.Text.Punycode as B
-import qualified Data.Text as C
-import qualified Data.HashMap.Strict as G
-import qualified Data.Vector as H
-import qualified Net.IPv4 as D
-import qualified Net.IPv6 as E
-import qualified Iri.Vector as F
-import qualified Iri.CodePointPredicates.Core as CorePredicates
-import qualified Iri.CodePointPredicates.Rfc3987 as Rfc3987Predicates
-import qualified Iri.CodePointPredicates.Rfc3986 as Rfc3986Predicates
-import qualified Iri.Utf8CodePoint as K
-import qualified Data.ByteString as ByteString
-
 
 iri :: Iri -> Builder
 iri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
-  scheme schemeValue <> 
-  char ':' <>
-  hierarchy hierarchyValue <>
-  (prependIfNotNull
-    (char '?')
-    (query queryValue)) <>
-  (prependIfNotNull
-    (char '#')
-    (fragment fragmentValue))
+  scheme schemeValue
+    <> char ':'
+    <> hierarchy hierarchyValue
+    <> ( prependIfNotNull
+           (char '?')
+           (query queryValue)
+       )
+    <> ( prependIfNotNull
+           (char '#')
+           (fragment fragmentValue)
+       )
 
 httpIri :: HttpIri -> Builder
 httpIri (HttpIri (Security secure) hostValue portValue pathValue queryValue fragmentValue) =
-  (if secure then string "https://" else string "http://") <>
-  host hostValue <>
-  prependIfNotNull (char ':') (port portValue) <>
-  prependIfNotNull (char '/') (path pathValue) <>
-  prependIfNotNull (char '?') (query queryValue) <>
-  prependIfNotNull (char '#') (fragment fragmentValue)
+  (if secure then string "https://" else string "http://")
+    <> host hostValue
+    <> prependIfNotNull (char ':') (port portValue)
+    <> prependIfNotNull (char '/') (path pathValue)
+    <> prependIfNotNull (char '?') (query queryValue)
+    <> prependIfNotNull (char '#') (fragment fragmentValue)
 
 scheme :: Scheme -> Builder
 scheme (Scheme bytes) =
@@ -51,7 +48,7 @@ scheme (Scheme bytes) =
 
 hierarchy :: Hierarchy -> Builder
 hierarchy =
-  \ case
+  \case
     AuthorisedHierarchy authorityValue pathValue ->
       string "//" <> authority authorityValue <> prependIfNotNull (char '/') (path pathValue)
     AbsoluteHierarchy pathValue ->
@@ -61,15 +58,15 @@ hierarchy =
 
 authority :: Authority -> Builder
 authority (Authority userInfoValue hostValue portValue) =
-  appendIfNotNull (char '@') (userInfo userInfoValue) <>
-  host hostValue <>
-  prependIfNotNull (char ':') (port portValue)
+  appendIfNotNull (char '@') (userInfo userInfoValue)
+    <> host hostValue
+    <> prependIfNotNull (char ':') (port portValue)
 
 userInfo :: UserInfo -> Builder
 userInfo =
-  \ case
+  \case
     PresentUserInfo (User user) password -> case password of
-      PresentPassword password -> userInfoComponent user <> char ':'  <> userInfoComponent password
+      PresentPassword password -> userInfoComponent user <> char ':' <> userInfoComponent password
       MissingPassword -> userInfoComponent user
     MissingUserInfo -> mempty
 
@@ -79,7 +76,7 @@ userInfoComponent =
 
 host :: Host -> Builder
 host =
-  \ case
+  \case
     NamedHost value -> domainName value
     IpV4Host value -> ipV4 value
     IpV6Host value -> ipV6 value
@@ -102,7 +99,7 @@ ipV6 =
 
 port :: Port -> Builder
 port =
-  \ case
+  \case
     PresentPort value -> unsignedDecimal value
     MissingPort -> mempty
 
@@ -128,19 +125,22 @@ urlEncodedBytesOrText unencodedPredicate1 unencodedPredicate2 bytes =
     Right text -> urlEncodedText unencodedPredicate1 text
     Left _ -> urlEncodedBytes unencodedPredicate2 bytes
 
-{-| Apply URL-encoding to text -}
+-- | Apply URL-encoding to text
 urlEncodedBytes :: CorePredicates.Predicate -> ByteString -> Builder
 urlEncodedBytes unencodedPredicate =
   ByteString.foldl'
-    (\ builder -> mappend builder . \ byte -> if unencodedPredicate (fromIntegral byte)
-      then utf8CodeUnits1 byte
-      else urlEncodedByte byte)
+    ( \builder ->
+        mappend builder . \byte ->
+          if unencodedPredicate (fromIntegral byte)
+            then utf8CodeUnits1 byte
+            else urlEncodedByte byte
+    )
     mempty
 
-{-| Apply URL-encoding to text -}
+-- | Apply URL-encoding to text
 urlEncodedText :: CorePredicates.Predicate -> Text -> Builder
 urlEncodedText unencodedPredicate =
-  C.foldl' (\ builder -> mappend builder . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
+  C.foldl' (\builder -> mappend builder . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
 
 urlEncodedUnicodeCodePoint :: CorePredicates.Predicate -> Int -> Builder
 urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
@@ -148,11 +148,12 @@ urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
     then
       unicodeCodePoint codePoint
     else
-      K.unicodeCodePoint codePoint
-        (\ b1 -> urlEncodedByte b1)
-        (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
-        (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
-        (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
+      K.unicodeCodePoint
+        codePoint
+        (\b1 -> urlEncodedByte b1)
+        (\b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
+        (\b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
+        (\b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
 
 urlEncodedByte :: Word8 -> Builder
 urlEncodedByte x =

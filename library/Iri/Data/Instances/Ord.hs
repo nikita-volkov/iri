@@ -1,10 +1,10 @@
-module Iri.Data.Instances.Ord
-where
+{-# OPTIONS_GHC -Wno-orphans #-}
 
-import Iri.Prelude
+module Iri.Data.Instances.Ord where
+
+import Iri.Data.Instances.Eq ()
 import Iri.Data.Types
-import Iri.Data.Instances.Eq
-
+import Iri.Prelude
 
 deriving instance Ord Iri
 

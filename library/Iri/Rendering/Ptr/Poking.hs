@@ -1,53 +1,52 @@
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
 module Iri.Rendering.Ptr.Poking
-(
-  uri,
-  httpUri,
-  scheme,
-  host,
-  path,
-  query,
-)
+  ( uri,
+    httpUri,
+    scheme,
+    host,
+    path,
+    query,
+  )
 where
 
-import Iri.Prelude hiding (null, poke)
+import Data.ByteString qualified as ByteString
+import Data.Text qualified as C
+import Data.Text.Encoding qualified as A
+import Data.Text.Punycode qualified as B
+import Iri.CodePointPredicates.Core qualified as I
+import Iri.CodePointPredicates.Rfc3986 qualified as I
 import Iri.Data
+import Iri.Prelude hiding (null, poke)
+import Iri.Rendering.Ptr.Poke qualified as L
+import Iri.Utf8CodePoint qualified as K
+import Iri.Vector qualified as F
+import Net.IPv4 qualified as D
+import Net.IPv6 qualified as E
 import Ptr.Poking
-import qualified Data.Text.Encoding as A
-import qualified Data.Text.Encoding.Error as A
-import qualified Data.Text.Punycode as B
-import qualified Data.Text as C
-import qualified Data.ByteString as ByteString
-import qualified Data.HashMap.Strict as G
-import qualified Data.Vector as H
-import qualified Net.IPv4 as D
-import qualified Net.IPv6 as E
-import qualified Iri.Vector as F
-import qualified Iri.CodePointPredicates.Core as I
-import qualified Iri.CodePointPredicates.Rfc3986 as I
-import qualified Iri.Utf8CodePoint as K
-import qualified Iri.Rendering.Ptr.Poke as L
-
 
 uri :: Iri -> Poking
 uri (Iri schemeValue hierarchyValue queryValue fragmentValue) =
-  scheme schemeValue <> 
-  asciiChar ':' <>
-  hierarchy hierarchyValue <>
-  (prependIfNotNull
-    (asciiChar '?')
-    (query queryValue)) <>
-  (prependIfNotNull
-    (asciiChar '#')
-    (fragment fragmentValue))
+  scheme schemeValue
+    <> asciiChar ':'
+    <> hierarchy hierarchyValue
+    <> ( prependIfNotNull
+           (asciiChar '?')
+           (query queryValue)
+       )
+    <> ( prependIfNotNull
+           (asciiChar '#')
+           (fragment fragmentValue)
+       )
 
 httpUri :: HttpIri -> Poking
 httpUri (HttpIri (Security secure) hostValue portValue pathValue queryValue fragmentValue) =
-  (if secure then "https://" else "http://") <>
-  host hostValue <>
-  prependIfNotNull (asciiChar ':') (port portValue) <>
-  prependIfNotNull (asciiChar '/') (path pathValue) <>
-  prependIfNotNull (asciiChar '?') (query queryValue) <>
-  prependIfNotNull (asciiChar '#') (fragment fragmentValue)
+  (if secure then "https://" else "http://")
+    <> host hostValue
+    <> prependIfNotNull (asciiChar ':') (port portValue)
+    <> prependIfNotNull (asciiChar '/') (path pathValue)
+    <> prependIfNotNull (asciiChar '?') (query queryValue)
+    <> prependIfNotNull (asciiChar '#') (fragment fragmentValue)
 
 scheme :: Scheme -> Poking
 scheme (Scheme value) =
@@ -55,7 +54,7 @@ scheme (Scheme value) =
 
 hierarchy :: Hierarchy -> Poking
 hierarchy =
-  \ case
+  \case
     AuthorisedHierarchy authorityValue pathValue ->
       bytes "//" <> authority authorityValue <> prependIfNotNull (asciiChar '/') (path pathValue)
     AbsoluteHierarchy pathValue ->
@@ -65,13 +64,13 @@ hierarchy =
 
 authority :: Authority -> Poking
 authority (Authority userInfoValue hostValue portValue) =
-  appendIfNotNull (asciiChar '@') (userInfo userInfoValue) <>
-  host hostValue <>
-  prependIfNotNull (asciiChar ':') (port portValue)
+  appendIfNotNull (asciiChar '@') (userInfo userInfoValue)
+    <> host hostValue
+    <> prependIfNotNull (asciiChar ':') (port portValue)
 
 userInfo :: UserInfo -> Poking
 userInfo =
-  \ case
+  \case
     PresentUserInfo (User user) password -> case password of
       PresentPassword password -> userInfoComponent user <> asciiChar ':' <> userInfoComponent password
       MissingPassword -> userInfoComponent user
@@ -83,7 +82,7 @@ userInfoComponent =
 
 host :: Host -> Poking
 host =
-  \ case
+  \case
     NamedHost value -> domainName value
     IpV4Host value -> ipV4 value
     IpV6Host value -> ipV6 value
@@ -108,7 +107,7 @@ ipV6 =
 
 port :: Port -> Poking
 port =
-  \ case
+  \case
     PresentPort value -> asciiIntegral value
     MissingPort -> mempty
 
@@ -130,25 +129,26 @@ fragment (Fragment value) =
 
 urlEncodedBytes :: I.Predicate -> ByteString -> Poking
 urlEncodedBytes unencodedPredicate =
-  ByteString.foldl' (\ poking -> mappend poking . byte) mempty
+  ByteString.foldl' (\poking -> mappend poking . byte) mempty
   where
     byte x =
       if unencodedPredicate (fromIntegral x)
         then word8 x
         else urlEncodedByte x
 
-{-| Apply URL-encoding to text -}
+-- | Apply URL-encoding to text
 urlEncodedText :: I.Predicate -> Text -> Poking
 urlEncodedText unencodedPredicate =
-  C.foldl' (\ poking -> mappend poking . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
+  C.foldl' (\poking -> mappend poking . urlEncodedUnicodeCodePoint unencodedPredicate . ord) mempty
 
 urlEncodedUnicodeCodePoint :: I.Predicate -> Int -> Poking
 urlEncodedUnicodeCodePoint unencodedPredicate codePoint =
-  K.unicodeCodePoint codePoint
-    (\ b1 -> if unencodedPredicate codePoint then word8 b1 else urlEncodedByte b1)
-    (\ b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
-    (\ b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
-    (\ b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
+  K.unicodeCodePoint
+    codePoint
+    (\b1 -> if unencodedPredicate codePoint then word8 b1 else urlEncodedByte b1)
+    (\b1 b2 -> urlEncodedByte b1 <> urlEncodedByte b2)
+    (\b1 b2 b3 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3)
+    (\b1 b2 b3 b4 -> urlEncodedByte b1 <> urlEncodedByte b2 <> urlEncodedByte b3 <> urlEncodedByte b4)
 
 urlEncodedByte :: Word8 -> Poking
 urlEncodedByte =

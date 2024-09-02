@@ -1,19 +1,19 @@
-module Iri.Data.Instances.Show
-where
+{-# OPTIONS_GHC -Wno-orphans #-}
 
-import Iri.Prelude
+module Iri.Data.Instances.Show where
+
+import Data.Text qualified as B
 import Iri.Data.Types
-import qualified Iri.Rendering.Text.Internal as A
-import qualified Data.Text as B
-
+import Iri.Prelude
+import Iri.Rendering.Text.Internal qualified as A
 
 instance Show Iri where
   show =
-    B.unpack . A.iri
+    mappend "\"" . flip mappend "\"" . B.unpack . A.iri
 
 instance Show HttpIri where
   show =
-    B.unpack . A.httpIri
+    mappend "\"" . flip mappend "\"" . B.unpack . A.httpIri
 
 deriving instance Show Scheme
 
@@ -44,4 +44,3 @@ deriving instance Show Query
 deriving instance Show Fragment
 
 deriving instance Show Security
-

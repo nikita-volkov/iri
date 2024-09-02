@@ -1,12 +1,10 @@
-module Iri.Vector
-where
+module Iri.Vector where
 
-import Iri.Prelude hiding (null, length)
 import Data.Vector
-
+import Iri.Prelude hiding (length, null)
 
 {-# INLINE intercalate #-}
-intercalate :: (Semigroup monoid, Monoid monoid) => (element -> monoid) -> monoid -> Vector element -> monoid
+intercalate :: (Monoid monoid) => (element -> monoid) -> monoid -> Vector element -> monoid
 intercalate project separator vector =
   if null vector
     then mempty
