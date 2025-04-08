@@ -2,12 +2,12 @@
 
 module Iri.Data.Instances.Lift where
 
-import Data.WideWord.Word128 qualified
+import qualified Data.WideWord.Word128
 import Iri.Data.Types
 import Iri.Prelude
 import Language.Haskell.TH.Lift
 import Language.Haskell.TH.Syntax
-import Net.IPv6 qualified
+import qualified Net.IPv6
 
 fmap concat
   $ traverse deriveLift

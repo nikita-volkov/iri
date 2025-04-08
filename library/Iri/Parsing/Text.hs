@@ -14,9 +14,9 @@ module Iri.Parsing.Text
   )
 where
 
-import Data.Attoparsec.Text qualified as B
+import qualified Data.Attoparsec.Text as B
 import Iri.Data
-import Iri.Parsing.Attoparsec.Text qualified as A
+import qualified Iri.Parsing.Attoparsec.Text as A
 import Iri.Prelude
 
 fromParser :: B.Parser a -> Text -> Either Text a

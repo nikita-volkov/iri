@@ -1,6 +1,6 @@
 module Iri.CodePointPredicates.Core where
 
-import Data.Vector.Unboxed qualified as A
+import qualified Data.Vector.Unboxed as A
 import Iri.Prelude hiding (Predicate, inRange, (&&&), (|||))
 
 type Predicate =

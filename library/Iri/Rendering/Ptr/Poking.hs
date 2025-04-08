@@ -10,19 +10,19 @@ module Iri.Rendering.Ptr.Poking
   )
 where
 
-import Data.ByteString qualified as ByteString
-import Data.Text qualified as C
-import Data.Text.Encoding qualified as A
-import Data.Text.Punycode qualified as B
-import Iri.CodePointPredicates.Core qualified as I
-import Iri.CodePointPredicates.Rfc3986 qualified as I
+import qualified Data.ByteString as ByteString
+import qualified Data.Text as C
+import qualified Data.Text.Encoding as A
+import qualified Data.Text.Punycode as B
+import qualified Iri.CodePointPredicates.Core as I
+import qualified Iri.CodePointPredicates.Rfc3986 as I
 import Iri.Data
 import Iri.Prelude hiding (null, poke)
-import Iri.Rendering.Ptr.Poke qualified as L
-import Iri.Utf8CodePoint qualified as K
-import Iri.Vector qualified as F
-import Net.IPv4 qualified as D
-import Net.IPv6 qualified as E
+import qualified Iri.Rendering.Ptr.Poke as L
+import qualified Iri.Utf8CodePoint as K
+import qualified Iri.Vector as F
+import qualified Net.IPv4 as D
+import qualified Net.IPv6 as E
 import Ptr.Poking
 
 uri :: Iri -> Poking

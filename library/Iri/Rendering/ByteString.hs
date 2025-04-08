@@ -2,8 +2,8 @@ module Iri.Rendering.ByteString where
 
 import Iri.Data
 import Iri.Prelude
-import Iri.Rendering.Ptr.Poking qualified as A
-import Ptr.ByteString qualified as F
+import qualified Iri.Rendering.Ptr.Poking as A
+import qualified Ptr.ByteString as F
 
 -- | Render as URI ASCII bytes
 uri :: Iri -> ByteString

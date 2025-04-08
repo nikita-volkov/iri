@@ -6,10 +6,10 @@ module Iri.QuasiQuoter
   )
 where
 
-import Data.Attoparsec.ByteString qualified as B
-import Data.Attoparsec.Text qualified as C
-import Iri.Parsing.Attoparsec.ByteString qualified as A
-import Iri.Parsing.Attoparsec.Text qualified as D
+import qualified Data.Attoparsec.ByteString as B
+import qualified Data.Attoparsec.Text as C
+import qualified Iri.Parsing.Attoparsec.ByteString as A
+import qualified Iri.Parsing.Attoparsec.Text as D
 import Iri.Prelude hiding (exp)
 import Language.Haskell.TH.Quote
 import Language.Haskell.TH.Syntax

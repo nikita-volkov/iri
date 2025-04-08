@@ -14,7 +14,7 @@ httpIriFromIri (Iri (Scheme scheme) hierarchy query fragment) =
     case hierarchy of
       AuthorisedHierarchy (Authority userInfo host port) path -> case userInfo of
         MissingUserInfo -> Right (HttpIri security host port path query fragment)
-        PresentUserInfo (User user) _ -> Left ("User Info is present")
+        PresentUserInfo (User _) _ -> Left ("User Info is present")
       _ -> Left ("Not an authorised hierarchy")
 
 -- | Generalize an HTTP IRI to IRI
