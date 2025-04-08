@@ -114,7 +114,7 @@
 module Iri.CodePointPredicates.Rfc3987 where
 
 import Iri.CodePointPredicates.Core
-import Iri.CodePointPredicates.Rfc3986 qualified as A
+import qualified Iri.CodePointPredicates.Rfc3986 as A
 import Iri.Prelude hiding (Predicate, inRange, (&&&), (|||))
 
 scheme :: Predicate

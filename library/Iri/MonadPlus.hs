@@ -1,8 +1,8 @@
 module Iri.MonadPlus where
 
 import Iri.Prelude hiding (foldl)
-import Ptr.ByteString qualified as ByteString
-import Ptr.Poking qualified as Poking
+import qualified Ptr.ByteString as ByteString
+import qualified Ptr.Poking as Poking
 
 {-# INLINE foldl #-}
 foldl :: (MonadPlus m) => (a -> b -> a) -> a -> m b -> m a

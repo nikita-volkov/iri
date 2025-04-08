@@ -8,10 +8,10 @@ module Iri.Parsing.ByteString
   )
 where
 
-import Data.Attoparsec.ByteString qualified as B
-import Data.ByteString qualified as ByteString
+import qualified Data.Attoparsec.ByteString as B
+import qualified Data.ByteString as ByteString
 import Iri.Data
-import Iri.Parsing.Attoparsec.ByteString qualified as A
+import qualified Iri.Parsing.Attoparsec.ByteString as A
 import Iri.Prelude
 
 parser :: B.Parser a -> ByteString -> Either Text a
@@ -43,9 +43,9 @@ regName =
 uriQuery :: ByteString -> Either Text Query
 uriQuery x =
   case ByteString.break (== 63) x of
-    (beforeQuestion, questionAndAfterQuestion) -> case ByteString.uncons questionAndAfterQuestion of
+    (_, questionAndAfterQuestion) -> case ByteString.uncons questionAndAfterQuestion of
       Just (_, afterQuestion) -> case ByteString.break (== 35) afterQuestion of
-        (beforeHash, hashAndAfterHash) -> Right (Query beforeHash)
+        (beforeHash, _) -> Right (Query beforeHash)
       Nothing ->
         Left "Does not start with a question mark"
 

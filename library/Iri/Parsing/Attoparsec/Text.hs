@@ -17,20 +17,20 @@ module Iri.Parsing.Attoparsec.Text
 where
 
 import Data.Attoparsec.Text hiding (try)
-import Data.ByteString qualified as K
-import Data.Text.Encoding qualified as B
-import Data.Text.Encoding.Error qualified as L
-import Data.Vector qualified as S
-import Iri.CodePointPredicates.Rfc3987 qualified as C
+import qualified Data.ByteString as K
+import qualified Data.Text.Encoding as B
+import qualified Data.Text.Encoding.Error as L
+import qualified Data.Vector as S
+import qualified Iri.CodePointPredicates.Rfc3987 as C
 import Iri.Data
-import Iri.MonadPlus qualified as R
+import qualified Iri.MonadPlus as R
 import Iri.Prelude
-import Net.IPv4 qualified as M
-import Net.IPv6 qualified as N
-import Ptr.ByteString qualified as ByteString
-import Ptr.Poking qualified as Poking
-import Text.Builder qualified as J
-import VectorBuilder.MonadPlus qualified as E
+import qualified Net.IPv4 as M
+import qualified Net.IPv6 as N
+import qualified Ptr.ByteString as ByteString
+import qualified Ptr.Poking as Poking
+import qualified TextBuilder as J
+import qualified VectorBuilder.MonadPlus as E
 
 {-# INLINE labeled #-}
 labeled :: String -> Parser a -> Parser a
@@ -45,7 +45,7 @@ iri :: Parser Iri
 iri =
   labeled "IRI" $ do
     parsedScheme <- scheme
-    char ':'
+    _ <- char ':'
     parsedHierarchy <- hierarchy
     parsedQuery <- query
     parsedFragment <- fragment
@@ -57,9 +57,9 @@ iri =
 httpIri :: Parser HttpIri
 httpIri =
   labeled "HTTP IRI" $ do
-    asciiCI "http"
+    _ <- asciiCI "http"
     secure <- satisfy (\x -> x == 's' || x == 'S') $> True <|> pure False
-    string "://"
+    _ <- string "://"
     parsedHost <- host
     parsedPort <- PresentPort <$> (char ':' *> port) <|> pure MissingPort
     parsedPath <- ((char '/') *> path) <|> pure (Path mempty)
@@ -171,13 +171,13 @@ urlEncodedComponent unencodedCharPredicate =
 urlEncodedComponentText :: (Char -> Bool) -> Parser Text
 urlEncodedComponentText unencodedCharPredicate =
   labeled "URL-encoded component"
-    $ fmap J.run
+    $ fmap J.toText
     $ R.foldl mappend mempty
     $ (J.text <$> takeWhile1 unencodedCharPredicate)
     <|> urlEncodedSequenceTextBuilder
 
 {-# INLINEABLE urlEncodedSequenceTextBuilder #-}
-urlEncodedSequenceTextBuilder :: Parser J.Builder
+urlEncodedSequenceTextBuilder :: Parser J.TextBuilder
 urlEncodedSequenceTextBuilder =
   labeled "URL-encoded sequence" $ do
     start <- progress (mempty, mempty, B.streamDecodeUtf8) =<< urlEncodedByte
@@ -200,7 +200,7 @@ urlEncodedSequenceTextBuilder =
 urlEncodedByte :: Parser Word8
 urlEncodedByte =
   do
-    char '%'
+    _ <- char '%'
     digit1 <- fromIntegral <$> hexadecimalDigit
     digit2 <- fromIntegral <$> hexadecimalDigit
     return (shiftL digit1 4 .|. digit2)

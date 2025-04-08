@@ -1,13 +1,13 @@
 module Iri.Optics.Defs where
 
-import Data.Text.Encoding qualified as Text
+import qualified Data.Text.Encoding as Text
 import Iri.Data
 import Iri.Optics.Basics
-import Iri.Parsing.ByteString qualified as B
-import Iri.Parsing.Text qualified as D
+import qualified Iri.Parsing.ByteString as B
+import qualified Iri.Parsing.Text as D
 import Iri.Prelude
-import Iri.Rendering.ByteString qualified as A
-import Iri.Rendering.Text qualified as C
+import qualified Iri.Rendering.ByteString as A
+import qualified Iri.Rendering.Text as C
 
 -- * Definitions by source
 

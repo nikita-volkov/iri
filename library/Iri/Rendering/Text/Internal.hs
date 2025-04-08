@@ -2,55 +2,55 @@ module Iri.Rendering.Text.Internal where
 
 import Iri.Data.Types
 import Iri.Prelude
-import Iri.Rendering.TextBuilder.Internal qualified as A
-import Text.Builder qualified as B
+import qualified Iri.Rendering.TextBuilder.Internal as A
+import qualified TextBuilder as B
 
 -- | Render as a Unicode IRI text
 iri :: Iri -> Text
-iri = B.run . A.iri
+iri = B.toText . A.iri
 
 -- | Render as a Unicode IRI text
 httpIri :: HttpIri -> Text
-httpIri = B.run . A.httpIri
+httpIri = B.toText . A.httpIri
 
 scheme :: Scheme -> Text
-scheme = B.run . A.scheme
+scheme = B.toText . A.scheme
 
 hierarchy :: Hierarchy -> Text
-hierarchy = B.run . A.hierarchy
+hierarchy = B.toText . A.hierarchy
 
 authority :: Authority -> Text
-authority = B.run . A.authority
+authority = B.toText . A.authority
 
 userInfo :: UserInfo -> Text
-userInfo = B.run . A.userInfo
+userInfo = B.toText . A.userInfo
 
 host :: Host -> Text
-host = B.run . A.host
+host = B.toText . A.host
 
 regName :: RegName -> Text
-regName = B.run . A.regName
+regName = B.toText . A.regName
 
 domainLabel :: DomainLabel -> Text
-domainLabel = B.run . A.domainLabel
+domainLabel = B.toText . A.domainLabel
 
 ipV4 :: IPv4 -> Text
-ipV4 = B.run . A.ipV4
+ipV4 = B.toText . A.ipV4
 
 ipV6 :: IPv6 -> Text
-ipV6 = B.run . A.ipV6
+ipV6 = B.toText . A.ipV6
 
 port :: Port -> Text
-port = B.run . A.port
+port = B.toText . A.port
 
 path :: Path -> Text
-path = B.run . A.path
+path = B.toText . A.path
 
 pathSegment :: PathSegment -> Text
-pathSegment = B.run . A.pathSegment
+pathSegment = B.toText . A.pathSegment
 
 query :: Query -> Text
-query = B.run . A.query
+query = B.toText . A.query
 
 fragment :: Fragment -> Text
-fragment = B.run . A.fragment
+fragment = B.toText . A.fragment

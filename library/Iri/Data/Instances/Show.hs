@@ -2,10 +2,10 @@
 
 module Iri.Data.Instances.Show where
 
-import Data.Text qualified as B
+import qualified Data.Text as B
 import Iri.Data.Types
 import Iri.Prelude
-import Iri.Rendering.Text.Internal qualified as A
+import qualified Iri.Rendering.Text.Internal as A
 
 instance Show Iri where
   show =

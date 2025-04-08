@@ -21,12 +21,11 @@ source-repository head
   type: git
   location: https://github.com/nikita-volkov/iri
 
-library
-  hs-source-dirs: library
+common base
   default-language: Haskell2010
   default-extensions:
-    Arrows
     BangPatterns
+    BlockArguments
     ConstraintKinds
     DataKinds
     DefaultSignatures
@@ -35,13 +34,13 @@ library
     DeriveFunctor
     DeriveGeneric
     DeriveTraversable
+    DerivingStrategies
     EmptyDataDecls
     FlexibleContexts
     FlexibleInstances
     FunctionalDependencies
     GADTs
     GeneralizedNewtypeDeriving
-    ImportQualifiedPost
     LambdaCase
     LiberalTypeSynonyms
     MagicHash
@@ -49,21 +48,42 @@ library
     MultiWayIf
     NoImplicitPrelude
     NoMonomorphismRestriction
+    NumericUnderscores
     OverloadedStrings
     ParallelListComp
     PatternGuards
-    PatternSynonyms
     QuasiQuotes
     RankNTypes
     RecordWildCards
     ScopedTypeVariables
     StandaloneDeriving
+    StrictData
     TemplateHaskell
     TupleSections
+    TypeApplications
     TypeFamilies
     TypeOperators
     UnboxedTuples
+    ViewPatterns
 
+common executable
+  import: base
+  ghc-options:
+    -O2
+    -threaded
+    -with-rtsopts=-N
+    -rtsopts
+    -funbox-strict-fields
+
+common test
+  import: base
+  ghc-options:
+    -threaded
+    -with-rtsopts=-N
+
+library
+  import: base
+  hs-source-dirs: library
   exposed-modules:
     Iri.Data
     Iri.Optics
@@ -112,7 +132,7 @@ library
     ptr >=0.16.1 && <0.17,
     template-haskell >=2.17 && <3,
     text >=2 && <3,
-    text-builder >=0.6.7.2 && <0.7,
+    text-builder ^>=1,
     th-lift >=0.8 && <0.9,
     th-lift-instances >=0.1.20 && <0.2,
     unordered-containers >=0.2 && <0.3,
@@ -138,50 +158,10 @@ library punycode
     Data.Text.Punycode.Shared
 
 test-suite test
+  import: test
   type: exitcode-stdio-1.0
   hs-source-dirs: test
   main-is: Main.hs
-  default-language: Haskell2010
-  default-extensions:
-    Arrows
-    BangPatterns
-    ConstraintKinds
-    DataKinds
-    DefaultSignatures
-    DeriveDataTypeable
-    DeriveFoldable
-    DeriveFunctor
-    DeriveGeneric
-    DeriveTraversable
-    EmptyDataDecls
-    FlexibleContexts
-    FlexibleInstances
-    FunctionalDependencies
-    GADTs
-    GeneralizedNewtypeDeriving
-    ImportQualifiedPost
-    LambdaCase
-    LiberalTypeSynonyms
-    MagicHash
-    MultiParamTypeClasses
-    MultiWayIf
-    NoImplicitPrelude
-    NoMonomorphismRestriction
-    OverloadedStrings
-    ParallelListComp
-    PatternGuards
-    PatternSynonyms
-    QuasiQuotes
-    RankNTypes
-    RecordWildCards
-    ScopedTypeVariables
-    StandaloneDeriving
-    TemplateHaskell
-    TupleSections
-    TypeFamilies
-    TypeOperators
-    UnboxedTuples
-
   build-depends:
     iri,
     rerebase <2,

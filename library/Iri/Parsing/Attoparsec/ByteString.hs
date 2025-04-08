@@ -8,21 +8,21 @@ module Iri.Parsing.Attoparsec.ByteString
 where
 
 import Data.Attoparsec.ByteString hiding (try)
-import Data.Attoparsec.ByteString.Char8 qualified as F
-import Data.ByteString qualified as K
-import Data.Text.Encoding qualified as B
-import Data.Text.Encoding.Error qualified as L
-import Data.Text.Punycode qualified as A
-import Data.Vector qualified as S
-import Iri.CodePointPredicates.Rfc3986 qualified as C
+import qualified Data.Attoparsec.ByteString.Char8 as F
+import qualified Data.ByteString as K
+import qualified Data.Text.Encoding as B
+import qualified Data.Text.Encoding.Error as L
+import qualified Data.Text.Punycode as A
+import qualified Data.Vector as S
+import qualified Iri.CodePointPredicates.Rfc3986 as C
 import Iri.Data
-import Iri.MonadPlus qualified as R
-import Iri.PercentEncoding qualified as I
+import qualified Iri.MonadPlus as R
+import qualified Iri.PercentEncoding as I
 import Iri.Prelude hiding (foldl, hash)
-import Net.IPv4 qualified as M
-import Net.IPv6 qualified as N
-import Text.Builder qualified as J
-import VectorBuilder.MonadPlus qualified as E
+import qualified Net.IPv4 as M
+import qualified Net.IPv6 as N
+import qualified TextBuilder as J
+import qualified VectorBuilder.MonadPlus as E
 
 {-# INLINE percent #-}
 percent :: Parser Word8
@@ -87,7 +87,7 @@ uri :: Parser Iri
 uri =
   labeled "URI" $ do
     parsedScheme <- scheme
-    colon
+    _ <- colon
     parsedHierarchy <- hierarchy
     parsedQuery <- query
     parsedFragment <- fragment
@@ -99,12 +99,12 @@ uri =
 httpUri :: Parser HttpIri
 httpUri =
   labeled "HTTP URI" $ do
-    satisfy (\x -> x == 104 || x == 72)
-    satisfy (\x -> x == 116 || x == 84)
-    satisfy (\x -> x == 116 || x == 84)
-    satisfy (\x -> x == 112 || x == 80)
+    _ <- satisfy (\x -> x == 104 || x == 72)
+    _ <- satisfy (\x -> x == 116 || x == 84)
+    _ <- satisfy (\x -> x == 116 || x == 84)
+    _ <- satisfy (\x -> x == 112 || x == 80)
     secure <- satisfy (\b -> b == 115 || b == 83) $> True <|> pure False
-    string "://"
+    _ <- string "://"
     parsedHost <- host
     parsedPort <- PresentPort <$> (colon *> port) <|> pure MissingPort
     parsedPath <- (forwardSlash *> path) <|> pure (Path mempty)
@@ -169,26 +169,26 @@ ipV6 :: Parser IPv6
 ipV6 =
   do
     a <- F.hexadecimal
-    colon
+    _ <- colon
     b <- F.hexadecimal
-    colon
+    _ <- colon
     c <- F.hexadecimal
-    colon
+    _ <- colon
     d <- F.hexadecimal
-    colon
+    _ <- colon
     mplus
       ( do
           e <- F.hexadecimal
-          colon
+          _ <- colon
           f <- F.hexadecimal
-          colon
+          _ <- colon
           g <- F.hexadecimal
-          colon
+          _ <- colon
           h <- F.hexadecimal
           return (N.fromWord16s a b c d e f g h)
       )
       ( do
-          colon
+          _ <- colon
           return (N.fromWord16s a b c d 0 0 0 0)
       )
 
@@ -252,7 +252,7 @@ utf8Chunks chunk =
           fail "Unexpected decoding error"
     finish (builder, undecodedBytes, _) =
       if K.null undecodedBytes
-        then return (J.run builder)
+        then return (J.toText builder)
         else fail (showString "UTF8 decoding: Bytes remaining: " (show undecodedBytes))
 
 {-# INLINEABLE urlEncodedString #-}
@@ -270,7 +270,7 @@ urlEncodedString unencodedBytesPredicate =
 percentEncodedByte :: Parser Word8
 percentEncodedByte =
   labeled "Percent-encoded byte" $ do
-    percent
+    _ <- percent
     byte1 <- anyWord8
     byte2 <- anyWord8
     I.matchPercentEncodedBytes (fail "Broken percent encoding") return byte1 byte2

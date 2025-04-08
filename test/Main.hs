@@ -1,10 +1,10 @@
 module Main where
 
-import Iri.Parsing.ByteString qualified as D
-import Iri.Parsing.Text qualified as F
+import qualified Iri.Parsing.ByteString as D
+import qualified Iri.Parsing.Text as F
 import Iri.QuasiQuoter
-import Iri.Rendering.ByteString qualified as E
-import Iri.Rendering.Text qualified as C
+import qualified Iri.Rendering.ByteString as E
+import qualified Iri.Rendering.Text as C
 import Test.Tasty
 import Test.Tasty.HUnit
 import Prelude
