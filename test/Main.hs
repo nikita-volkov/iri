@@ -1,5 +1,6 @@
 module Main where
 
+import qualified Data.Text as T
 import qualified Iri.Parsing.ByteString as D
 import qualified Iri.Parsing.Text as F
 import Iri.QuasiQuoter
@@ -80,6 +81,27 @@ main =
                     "http://点心和烤鸭.w3.mag.keio.ac.jp"
                     "http://xn--0trv4xfvn8el34t.w3.mag.keio.ac.jp/"
                 ],
+        testCase "Hex digit parsing bug reproduction - lowercase hex digits"
+          $ do
+            -- Bug: lowercase hex digits 'a'-'f' were calculated as (ascii - 97) instead of (ascii - 87)
+            -- This caused %6a (should be ASCII 106 = 'j') to be parsed incorrectly
+            -- %6a = 6*16 + 10 = 106 = 'j', but with bug: 6*16 + 0 = 96 = '`'
+            let result = F.iri "https://example.com/test%6a" -- should be 'j'
+            case result of
+              Left err -> assertFailure $ "Should parse successfully: " ++ T.unpack err
+              Right iri ->
+                let rendered = C.iri iri -- Use text rendering to see decoded content
+                 in assertBool "Should contain 'j' when correctly parsed" ('j' `T.elem` rendered),
+        testCase "Lowercase hex digits a-f UTF-8 parsing"
+          $ do
+            -- Test that %c3%a9 (UTF-8 for é) parses correctly with lowercase hex
+            -- This tests the fix for hex digits 'c' and 'a' which were affected by the bug
+            let result = F.iri "https://example.com/caf%c3%a9"
+            case result of
+              Left _ -> assertFailure "Should parse UTF-8 encoded URL successfully"
+              Right iri ->
+                let rendered = C.iri iri -- Use text rendering to see the decoded UTF-8
+                 in assertBool "Should contain é character when correctly decoded" ('é' `T.elem` rendered),
         testGroup "Mess"
           $ [ testCase "1"
                 $ assertEqual

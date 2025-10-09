@@ -218,7 +218,7 @@ hexadecimalDigit =
           then return (x - 55)
           else
             if x >= 97 && x < 103
-              then return (x - 97)
+              then return (x - 87)
               else fail ("Not a hexadecimal digit: " <> show c)
 
 {-# INLINEABLE query #-}
